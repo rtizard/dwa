@@ -3,37 +3,55 @@ RT's Style Sheet for P1
 */
 
 body {
-font-family: Arial, Helvetica, sans-serif;
+font-family: Arial, sans-serif;
 background-image: url('dna2.jpeg');
 color: white;
 }
 
-h1 {
-font-family: Arial, Helvetica, "Trebuchet MS", sans-serif;
+h1, h2 {
+/* border: 1px solid white; */
 }
 
 .humor {
 font-style: italic;
 }
 
-#bio {
-color: #1BA8E0;
+p {
+/* color: #1BA8E0; not light enough? */
+color: #D7CEF5;
+/* border: 1px solid white; */
 }
 
 .bullets {
 color: #1BA8E0;
+/* line-height: 150%; */
+/* border: 1px solid white; */
 }
 
 a:link {
 color: gray
 }
-
 a:visited {
 color: #BD84E3
 }
 a:hover {
-color: white
+color: gray
 }
 a:active {
 color: red
+}
+
+#toolkit {
+position: absolute;
+top: 75px;
+left: 680px;
+width: 500px;
+}
+
+
+#bio {
+position: absolute;
+top: 250px;
+left: 30px;
+width: 580px;
 }
