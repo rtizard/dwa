@@ -50,7 +50,8 @@ width: 500px;
 
 #bio {
 position: absolute;
-background-color: #1D2140;
+background-color:rgba(25,25,50,0.7);
+border: 1px solid white; 
 
 top: 250px;
 left: 10px;
