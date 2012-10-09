@@ -34,10 +34,10 @@
 <body>
     Refresh to play again <br><br>
     
-    The winning number is <?php=$winning_number?>!<br><br>
+    The winning number is <?=$winning_number?>!<br><br>
         
     <?php foreach($contestants as $contestant => $winner_or_loser): ?>
-        <?php=$contestant?> is a <?=$winner_or_loser?><br>
+        <?=$contestant?> is a <?=$winner_or_loser?><br>
     <?php endforeach; ?>
 </body>
 </html>
