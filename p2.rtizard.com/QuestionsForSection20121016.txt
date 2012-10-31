@@ -1,0 +1,29 @@
+Problems understanding Framework Tutorial
+
+1) @$? Answer from Dharia: suppresses errors from the expression it prepends. Ignore functionally.
+2) Nevermind: got it! In this code snippet $this->template->content = View::instance('v_users_profile'); where is v_users_profile defined?
+
+Notes for 10/17/12
+
+
+landing page for p2.yourdomain.com
+
+New users: sign up, log in, sales pitch
+Logged in users: profile, means to post something, recent stream (or maybe you link out to this content), log out
+
+Let's do this by next week for sure.
+
+Entries might need a new controller. Build a database for entries.
+
+Now Susan jumped to the notes.
+
+She mentioned that Jquery is a good place to check for good input data. Don't have PHP do error checking, for efficiency's sake.
+
+For WAMP, leave the dbase password blank. Should be ok in Mamp.
+
+TABLE for microblog entries:
+1) ID 
+2) Author
+3) Date
+4) content
+Other fields?

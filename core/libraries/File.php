@@ -13,8 +13,8 @@ class File {
 	protected static $_files = array();
 	
 	// Searches for a file in the application, and returns the path to the file that has the highest precedence.
-	// Example: File::find('views/templates/v_store_home'); 
-	// Returns an absolute path to /home/photojojo/www/store/views/templates/v_store_home.php
+	// Example: File::find('views/templates/v_users_login'); 
+	// Returns an absolute path to /path/to/www/views/templates/v_users_login.php
 	// You can specify an additional search_path for looking in non-standard dirs first (such as other APP_PATHS or outside of DOC_ROOT)
 	public static function find($path, $search_path = NULL) {
 

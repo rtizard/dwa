@@ -4,8 +4,6 @@
 // Acts as an object wrapper for HTML pages with embedded PHP, called "views". 
 // Variables can be assigned with the view object and referenced locally within the view.
 
-// Modified by Aaron Oxborrow for Photojojo
-
 // @author     Kohana Team
 // @copyright  (c) 2008-2011 Kohana Team
 // @license    http://kohanaframework.org/license

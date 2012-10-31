@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 # Start benchmark
     $benchmark_start = microtime(TRUE);
      

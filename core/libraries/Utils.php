@@ -5,6 +5,53 @@
 class Utils {
 
 	/*-------------------------------------------------------------------------------------------------
+	Truncates a string to a certain char length, stopping on a word if not specified otherwise.
+	-------------------------------------------------------------------------------------------------*/
+	public static function truncate($string, $length, $stopanywhere = FALSE) {
+
+	    if (strlen($string) > $length) {
+	    
+	        # limit hit
+	        $string = substr($string,0,($length -3));
+	    
+	        # Stop anywhere
+	        if ($stopanywhere) {
+	            $string .= '...';
+	        # Stop on a word
+	        } else {
+	            $string = substr($string,0,strrpos($string,' ')).'...';
+	        }
+	    }
+	    return $string;
+	}
+
+
+	/*-------------------------------------------------------------------------------------------------
+	
+	-------------------------------------------------------------------------------------------------*/
+	public static function generate_random_string($length = 6) {
+	
+		$vowels     = 'aeuy';
+		$consonants = 'bdghjmnpqrstvz';
+		$string     = '';
+		
+		$alt = time() % 2;
+		for ($i = 0; $i < $length; $i++) {
+			if ($alt == 1) {
+				$string .= $consonants[(rand() % strlen($consonants))];
+				$alt = 0;
+			} else {
+				$string .= $vowels[(rand() % strlen($vowels))];
+				$alt = 1;
+			}
+		}
+		
+		return $string;
+
+	}
+
+
+	/*-------------------------------------------------------------------------------------------------
 	
 	-------------------------------------------------------------------------------------------------*/
 	public static function postfix($string_to_add, $file_name) {
@@ -46,12 +93,13 @@ class Utils {
 	    $sort_col = array();
 	    
 	    if(empty($arr)) return;
-	   	       
+	  	     	       
 	    foreach ($arr as $key => $row) {
-		    
+
 		    # If we can't find the column, return
-		    if(@!$row[$col]) return;
-		    
+		    if(!array_key_exists($col, $row)) 
+		    	return;		    
+		    	
 	        $sort_col[$key] = $row[$col];
 	       
 	    }
@@ -145,7 +193,7 @@ class Utils {
 		$subject = APP_NAME." ".$subject;
 		
 		# Add Router and execution time
-		$body .= '<h2>Routed Controller/Method:</h2> '.Router::$controller.'/'.Router::$method.'<br/>'.PHP_EOL;
+		$body .= '<h2>Routed Controller/Method:</h2> '.Router::$controller.'/'.Router::$method.'<br/>';
 		
 		# Add cookies
 		$body .= "<h2>Cookies</h2>";
@@ -160,7 +208,7 @@ class Utils {
 		foreach($_GET as $k => $v) { $body .= $k." = ".$v."<br>"; }
 		
 		# Fire email
-		Email::send($to, $from, $subject, $body, true, '', $bcc);
+		Email::send($to, $from, $subject, $body, true, '', '');
 		
 	}
 
@@ -171,10 +219,12 @@ class Utils {
 	public static function quick_view($template, $message, $title = NULL, $type = 'message') {
 	
 		# Setup view
-			$template->content     = View::instance('v_message');
-			$template->title       = $title;
+			$template->content     		= View::instance('v_message');
+			$template->title       		= $title;
 			$template->content->message = $message;
 			$template->content->type    = $type;
+			$template->hide_menu 		= TRUE;
+			$template->hide_footer 		= TRUE;
 		
 		# Render view 
 			echo $template;
@@ -263,7 +313,13 @@ class Utils {
         foreach($files as $file) {
             
             if(strstr($file,".css")) {
-                $contents .= '<link rel="stylesheet" type="text/css" href="'.$file.'">';
+            
+            	if(strstr($file,"print_")) {
+            		$contents .= '<link rel="stylesheet" type="text/css" href="'.$file.'" media="print">';
+            	}
+            	else {
+	                $contents .= '<link rel="stylesheet" type="text/css" href="'.$file.'">';
+	            }
             }
             else {
             	$contents .= '<script type="text/javascript" src="'.$file.'"></script>';	
@@ -304,8 +360,9 @@ class Utils {
 		 			 		
 		# Extract  		
 		while($foundString != 0) {
-			$ini     = strpos($string,$start,$cursor);
-			if($ini) {
+			$ini = strpos($string,$start,$cursor);
+					
+			if($ini >= 0) {
 				$ini    += strlen($start);
 				$len     = strpos($string,$end,$ini) - $ini;
 				$cursor  = $ini;
