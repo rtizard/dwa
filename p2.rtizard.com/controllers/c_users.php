@@ -3,7 +3,7 @@ class users_controller extends base_controller {
 
 	public function __construct() {
 		parent::__construct();
-		echo "users_controller __construct() was called<br><br>";
+		#echo "users_controller __construct() was called<br><br>";
 	} 
 	
 	public function index() {
