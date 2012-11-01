@@ -24,7 +24,7 @@ class users_controller extends base_controller {
 	public function p_signup() {
     
     # Dump out the results of POST to see what the form submitted
-    print_r($_POST);
+   # print_r($_POST);
     
     # Encrypt the password  
     $_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']);
@@ -92,9 +92,9 @@ public function signupOrLogin() {
 				
 	# If we didn't get a token back, login failed
 	if(!$token) {
-			
+		# ACTION ITEM: SOME MESSAGE TO THE USER THAT LOGIN FAILED??? HOW?
 		# Send them back to the login page
-		Router::redirect("/users/login/");
+		Router::redirect("/users/signupOrLogin/");
 		
 	# But if we did, login succeeded! 
 	} else {
@@ -102,6 +102,18 @@ public function signupOrLogin() {
 		# Store this token in a cookie
 		setcookie("token", $token, strtotime('+1 year'), '/');
 		
+		# manage NumLogins field in the database table users
+		
+		$q = "SELECT numLogins 
+		FROM users 
+		WHERE token = '".$token."'";
+	
+	$numLogins = DB::instance(DB_NAME)->select_field($q);	
+	$numLogins = $numLogins + 1;
+	 # Do the update
+	$data = Array("numLogins" => $numLogins);
+	DB::instance(DB_NAME)->update("users", $data, "WHERE token = '".$token."'");
+   
 		# Send them to the main page - or whever you want them to go
 		Router::redirect("/posts/index");
 					
