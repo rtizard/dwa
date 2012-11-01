@@ -4,27 +4,13 @@ RT's embryonic CSS file for index view
 
 body {
 font-family: Arial, sans-serif;
+background-image: url('dna2.jpeg');
+color: white;
 }
 
-.formTitle {
-font-size: large;
-color: blue;
+p {
+color: #D7CEF5; /*this is used for the text of the biography paragraph */
 }
-
-form {
-border: 1px solid gray; 
-/* position isn't clear
-top: 250px;
-left: 10px;
-*/
-width: 200px;
-padding-left: 6px;
-padding-right: 6px;
-padding-top: 0px;
-padding-bottom: 6px;
-font-size: small;
-}
-
 
 h2 {
 margin-top: 5px;

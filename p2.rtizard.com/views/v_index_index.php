@@ -1,6 +1,5 @@
-<pre>
-Hello World!
-Controller: c_index.php
-Method: index()
-View: v_index_index.php
-</pre>
+<h1>Welcome to Bliptide
+			<? if($user): ?>
+			<?=", ".$user->first_name;?>
+			<? endif; ?>
+</h1>

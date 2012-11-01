@@ -1,5 +1,5 @@
 <form method='POST' action='/users/p_login'>
- 
+<p class="formTitle">Returning? Please log in.</p>
     Email<br>
     <input type='text' name='email'>
     
@@ -10,6 +10,6 @@
  
     <br><br>
     
-    <input type='submit'>
+    <input type='submit' value="Submit">
  
 </form>

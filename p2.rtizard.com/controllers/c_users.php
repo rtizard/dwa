@@ -50,6 +50,28 @@ class users_controller extends base_controller {
 	
 }
 
+public function signupOrLogin() {
+
+	# Setup view
+		$this->template->content = View::instance('v_users_login');
+		$this->template->content .= View::instance('v_users_signup');
+		$this->template->title   = "Signup, or Login for Returning Blipsters";
+#  ACTION ITEM:
+# Note that we should either customize this specifically for this function
+#   or if left as single css for all user views, it should be called in a DRY fashion
+			# Load CSS / JS
+		$client_files = Array(
+				"/css/users.css",
+	            );
+	
+        $this->template->client_files = Utils::load_client_files($client_files);   
+	
+	# Render template
+		echo $this->template;
+	
+}
+
+
 
 	public function p_login() {
 	
@@ -81,7 +103,7 @@ class users_controller extends base_controller {
 		setcookie("token", $token, strtotime('+1 year'), '/');
 		
 		# Send them to the main page - or whever you want them to go
-		Router::redirect("/");
+		Router::redirect("/posts/index");
 					
 	}
 

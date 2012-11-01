@@ -1,4 +1,6 @@
+<div id="signupForm">
 <form method='POST' action='/users/p_signup'>
+<p class="formTitle">New here? Please sign up.</p>
 
 	First Name<br>
 	<input type='text' name='first_name'>
@@ -16,6 +18,7 @@
 	<input type='password' name='password'>
 	<br><br>
 	
-	<input type='submit'>
+    <input type='submit' value="Submit">
 
 </form> 
+</div>
