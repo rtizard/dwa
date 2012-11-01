@@ -29,7 +29,7 @@ A email designated to receive messages from the server. Examples:
  	
  	Some might want this to be the same as the APP_EMAIL, others might want to create a designated gmail address for it
 */ 	
-	define('SYSTEM_EMAIL', 'webmaster@myapp.com'); 
+	define('SYSTEM_EMAIL', 'rtizard@mac.com'); # changed 11/1/12
 
 # Default DB name for this app
 	define('DB_NAME', 'rtizardc_p2_rtizard_com'); 
