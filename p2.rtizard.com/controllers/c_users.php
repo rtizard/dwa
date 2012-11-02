@@ -61,9 +61,12 @@ public function signupOrLogin($error = NULL) {
 
 	# Setup view
 	
+	# problem 20121102 at 12:45 EDT -- value of $error should determine whether login error message is visible or not in 'v_users_login'. MISTAKENLY always visible.
+	# If I can solve this "error" error then I can implement better error handling subsequently based on more detailed errors returned from 
+	# 	login_redirectNonCore included in this class and based on code in the core.
 	
 		$this->template->content = View::instance('v_users_login');
-		$this->template->content .= View::instance('v_users_signup');#commenting out this line doesn't help reveal error message.
+		$this->template->content .= View::instance('v_users_signup');
 		# Pass parameter data to the view
 		$this->template->content->error = $error; # ERROR IS NOT APPEARING OUCH.
 		$this->template->title   = "Signup, or Login for Returning Blipsters";
