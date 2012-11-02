@@ -8,7 +8,7 @@ font-family: Arial, sans-serif;
 
 .formTitle {
 font-size: large;
-color: blue;
+color: green;
 }
 
 form {
@@ -25,6 +25,9 @@ padding-bottom: 6px;
 font-size: small;
 }
 
+.error {
+color: red;
+}
 
 h2 {
 margin-top: 5px;

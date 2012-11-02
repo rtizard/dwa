@@ -3,13 +3,19 @@ class users_controller extends base_controller {
 
 	public function __construct() {
 		parent::__construct();
+		$client_files = Array(
+				"/css/users.css",
+	            );
+	
+        $this->template->client_files = Utils::load_client_files($client_files);   
+	
 		#echo "users_controller __construct() was called<br><br>";
 	} 
-	
+		
 	public function index() {
 		echo "Welcome to the users's department";
 	}
-	
+		
 	public function signup() {
 		
 		# Setup view
@@ -38,7 +44,7 @@ class users_controller extends base_controller {
     $user_id = DB::instance(DB_NAME)->insert("users", $_POST);
     
 }
-
+	
 	public function login() {
 
 	# Setup view
@@ -50,29 +56,24 @@ class users_controller extends base_controller {
 	
 }
 
-public function signupOrLogin() {
+		
+public function signupOrLogin($error = NULL) {
 
 	# Setup view
+	
+	
 		$this->template->content = View::instance('v_users_login');
-		$this->template->content .= View::instance('v_users_signup');
+		$this->template->content .= View::instance('v_users_signup');#commenting out this line doesn't help reveal error message.
+		# Pass parameter data to the view
+		$this->template->content->error = $error; # ERROR IS NOT APPEARING OUCH.
 		$this->template->title   = "Signup, or Login for Returning Blipsters";
-#  ACTION ITEM:
-# Note that we should either customize this specifically for this function
-#   or if left as single css for all user views, it should be called in a DRY fashion
-			# Load CSS / JS
-		$client_files = Array(
-				"/css/users.css",
-	            );
-	
-        $this->template->client_files = Utils::load_client_files($client_files);   
-	
+
+		
 	# Render template
 		echo $this->template;
 	
 }
-
-
-
+	
 	public function p_login() {
 	
 	# Sanitize the user entered data to prevent any funny-business (re: SQL Injection Attacks)
@@ -89,38 +90,62 @@ public function signupOrLogin() {
 		AND password = '".$_POST['password']."'";
 	
 	$token = DB::instance(DB_NAME)->select_field($q);	
-				
-	# If we didn't get a token back, login failed
-	if(!$token) {
-		# ACTION ITEM: SOME MESSAGE TO THE USER THAT LOGIN FAILED??? HOW?
-		# Send them back to the login page
-		Router::redirect("/users/signupOrLogin/");
+						
+		if(!$token) {
+			#login failed--go directly to local version of redirect method for troubleshooting and error reporting
+			$this->login_redirectNonCore($token, $_POST['email'], "/posts/index/");
+
 		
-	# But if we did, login succeeded! 
-	} else {
-			
-		# Store this token in a cookie
-		setcookie("token", $token, strtotime('+1 year'), '/');
+			} else {
+			# Store this token in a cookie
+			setcookie("token", $token, strtotime('+1 year'), '/');
 		
-		# manage NumLogins field in the database table users
+			# manage NumLogins field in the database table users
 		
-		$q = "SELECT numLogins 
-		FROM users 
-		WHERE token = '".$token."'";
+			$q = "SELECT numLogins 
+			FROM users 
+			WHERE token = '".$token."'";
 	
-	$numLogins = DB::instance(DB_NAME)->select_field($q);	
-	$numLogins = $numLogins + 1;
-	 # Do the update
-	$data = Array("numLogins" => $numLogins);
-	DB::instance(DB_NAME)->update("users", $data, "WHERE token = '".$token."'");
-   
-		# Send them to the main page - or whever you want them to go
-		Router::redirect("/posts/index");
+			$numLogins = DB::instance(DB_NAME)->select_field($q);	
+			$numLogins = $numLogins + 1;
+			 # Do the update on numLogins for the user
+			$data = Array("numLogins" => $numLogins);
+			DB::instance(DB_NAME)->update("users", $data, "WHERE token = '".$token."'");
+   			#now use the local version of redirect method, somewhat unnecessarily!
+			$this->login_redirectNonCore($token, $_POST['email'], "/posts/index/");
+			}
 					
+} # end of p_login()
+	
+		
+	/*-------------------------------------------------------------------------------------------------
+	Where do we go after logging in / attempting to login?
+	-------------------------------------------------------------------------------------------------*/
+	public function login_redirectNonCore($token, $email, $destination) {
+		
+		# Success - send them to their destination
+		if($token) {
+			Router::redirect($destination);
+		}
+		# Fail - try and figure out why
+		else {
+			# Do we even have a user with that email?
+			$found_email = DB::instance(DB_NAME)->select_field("SELECT email FROM users WHERE email = '".$email."'");
+						
+			# If we found the email, then the problem must be the password
+			$error = ($found_email) ? "password" : "email";
+			
+			# Send them back to the login page
+			#Router::redirect('/users/signupOrLogin/?error='.$error.'&email='.$email.'&ref='.$destination);
+			#simpler version for testing:
+			Router::redirect('/users/signupOrLogin/error');
+		}
+	
 	}
+	
+	
 
-}
-
+	
 	public function logout() {
     
     # Generate and save a new token for next login
@@ -140,7 +165,8 @@ public function signupOrLogin() {
  # Send them back to the main landing page
 	Router::redirect("/");
 }
-	public function profile() {
+
+public function profile() {
  
     # If user is blank, they're not logged in, show message and don't do anything else
     if(!$this->user) {
