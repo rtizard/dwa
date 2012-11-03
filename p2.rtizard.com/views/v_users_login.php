@@ -12,9 +12,9 @@
     <br><br>
 
 	
-   <? if($errorMessage !== ""): ?>
+   <? if($loginErrorMessage !== ""): ?>
 		<div class='error'>
-		<?=$errorMessage; ?>
+		<?=$loginErrorMessage; ?>
 		</div>
 		<br>
 	<? endif; ?>

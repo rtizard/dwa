@@ -9,11 +9,14 @@ color: blue;
 
 table {
 border: 1px solid black;
+border: 0px; 
+   padding: 5px;
+
 }
 
 th {
 text-align: left;
-background: gray;
+   background-color: #9999CC;
 color: white;
 padding: 0.2em;
 }
@@ -26,12 +29,26 @@ td {
 border: 1 px solid black;
 padding: 0.2em;
 text-align: left;
-text-align: top;
-background: gray;
-color: white;
+background-color: #F0F0F0;
+color: #9999CC;
+color: gray;
 font-size: small;
 }
-
+/* stolen CSS (borrowed?)
+table.doctable, table.informaltable { 
+   border: 0px; 
+}
+table.doctable td, table.doctable th, table.doctable caption,
+table.informaltable td, table.informaltable th, table.informaltable caption { 
+   padding: 5px;
+}
+table.doctable thead th, table.informaltable thead th { 
+   background-color: #9999CC;
+}
+table.doctable tbody td, table.informaltable tbody td {
+   background-color: #F0F0F0;
+}
+*/
 
 .formTitle {
 font-size: large;
