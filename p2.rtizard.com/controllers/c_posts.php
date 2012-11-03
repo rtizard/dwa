@@ -5,6 +5,12 @@ class posts_controller extends base_controller {
 	public function __construct() {
 		parent::__construct();
 		
+		$client_files = Array(
+				"/css/posts.css",
+	            );
+	
+        $this->template->client_files = Utils::load_client_files($client_files);   
+	
 		# Make sure user is logged in if they want to use anything in this controller
 		if(!$this->user) {
 			die("Members only. <a href='/users/login'>Login</a>");
@@ -22,6 +28,8 @@ class posts_controller extends base_controller {
 		echo $this->template;
 	
 	}
+	
+	
 	
 	public function p_add() {
 			

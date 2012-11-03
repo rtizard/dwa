@@ -42,6 +42,12 @@ class users_controller extends base_controller {
              
     # Insert this user into the database 
     $user_id = DB::instance(DB_NAME)->insert("users", $_POST);
+    # for now at least, have a new user follow self to prevent trivial error
+    $data = Array("created" => $_POST['created'],
+    			"user_id" => $user_id,
+    			"user_id_followed" => $user_id,
+    			);
+	$dummyvariable = DB::instance(DB_NAME)->insert("users_users", $data);
     
 }
 	
@@ -54,24 +60,31 @@ class users_controller extends base_controller {
 	# Render template
 		echo $this->template;
 	
-}
+	}
 
 		
 public function signupOrLogin($error = NULL) {
 
-	# Setup view
-	
-	# problem 20121102 at 12:45 EDT -- value of $error should determine whether login error message is visible or not in 'v_users_login'. MISTAKENLY always visible.
-	# If I can solve this "error" error then I can implement better error handling subsequently based on more detailed errors returned from 
-	# 	login_redirectNonCore included in this class and based on code in the core.
-	
+	# Setup the login portion of the view. Second view for signup follows below.
+
 		$this->template->content = View::instance('v_users_login');
+		
+	# Compose error message from the URL composed by login_redirectNonCore
+		
+		if ($_GET['error'] == "email"){ 
+		$this->template->content->errorMessage = "Your email address was not found. Please sign up or try logging in again.";	
+		} elseif ($_GET['error'] == "password"){
+		$this->template->content->errorMessage = "Your email address was found but your password was incorrect. Try logging in again?";	
+		} else {
+		$this->template->content->errorMessage = "" ; # no error
+		}
+
+	#Include the signup view on the same page
 		$this->template->content .= View::instance('v_users_signup');
-		# Pass parameter data to the view
-		$this->template->content->error = $error; # ERROR IS NOT APPEARING OUCH.
+		
+	# set the title
 		$this->template->title   = "Signup, or Login for Returning Blipsters";
 
-		
 	# Render template
 		echo $this->template;
 	
@@ -122,7 +135,7 @@ public function signupOrLogin($error = NULL) {
 	
 		
 	/*-------------------------------------------------------------------------------------------------
-	Where do we go after logging in / attempting to login?
+	Where do we go after logging in / attempting to login? Slightly modified by RT from core version.
 	-------------------------------------------------------------------------------------------------*/
 	public function login_redirectNonCore($token, $email, $destination) {
 		
@@ -138,10 +151,11 @@ public function signupOrLogin($error = NULL) {
 			# If we found the email, then the problem must be the password
 			$error = ($found_email) ? "password" : "email";
 			
-			# Send them back to the login page
-			#Router::redirect('/users/signupOrLogin/?error='.$error.'&email='.$email.'&ref='.$destination);
+			# Send them back to the login page with a description of the error: email missing or bad password
+			Router::redirect('/users/signupOrLogin/?error='.$error.'&email='.$email.'&ref='.$destination);
+			#Router::redirect('/users/signupOrLogin/error='.$error.'&email='.$email);
 			#simpler version for testing:
-			Router::redirect('/users/signupOrLogin/error');
+			#Router::redirect('/users/signupOrLogin/error'); # this works as is, but fails to reach page if preceeded by ?
 		}
 	
 	}

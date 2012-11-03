@@ -11,10 +11,10 @@
  
     <br><br>
 
-
-   <? if($error="error"): ?>
+	
+   <? if($errorMessage !== ""): ?>
 		<div class='error'>
-			Login failed. Please double check your email and password.
+		<?=$errorMessage; ?>
 		</div>
 		<br>
 	<? endif; ?>

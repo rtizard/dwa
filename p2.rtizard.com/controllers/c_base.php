@@ -6,6 +6,7 @@ class base_controller {
 	public $userObj;
 	public $template;
 	public $email_template;
+	#public $error; # does this address my error handling problems at login?
 
 	/*-------------------------------------------------------------------------------------------------
 	
