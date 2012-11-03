@@ -69,8 +69,7 @@ class users_controller extends base_controller {
 				# easier alternative: redirect to login only page with a welcoming message!
 
 			} else { # password too short
-			    	Router::redirect('/users/signupOrLogin/?error=signupPassword');
-
+				Router::redirect('/users/signupOrLogin/?error=signupPassword');
 			}
 
     	} else { #bad firstname lastname combo

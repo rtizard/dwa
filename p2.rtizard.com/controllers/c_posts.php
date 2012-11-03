@@ -13,7 +13,7 @@ class posts_controller extends base_controller {
 	
 		# Make sure user is logged in if they want to use anything in this controller
 		if(!$this->user) {
-			die("Members only. <a href='/users/login'>Login</a>");
+			die("Members only. <a href='/users/signupOrLogin'>Return to Signup and Login Page</a>");
 		}
 		
 	}
@@ -29,10 +29,70 @@ class posts_controller extends base_controller {
 	
 	}
 	
+	public function index() { #new version, better function name would be showExistingAndAdd
 	
+	# Set up view
+	$this->template->content = View::instance('v_posts_showAndAdd');
+	$this->template->title   = "Posts";
+	
+	if(!empty($_GET)) {
+		$_GET = DB::instance(DB_NAME)->sanitize($_GET);
+		# switch statement is easily expanded to add additional cases, obviously.
+		switch ($_GET['error']) { # tampering with URI by the user will result in redirect without useful error message. OK result.
+			case "blankContent":
+				$this->template->content->submitPostErrorMessage = "Your post had no content. Try again?";	
+				break;
+			case "badWord": # note that this case is actually not trapped for because Harvard is all for free self expression. This year.
+				$this->template->content->submitPostErrorMessage = "Your post was too nasty for Harvard Extension School. Try again?";	
+				break;				
+		}
+
+	} else {    # GET string is empty. Content is OK. 
+	$this->template->content->submitPostErrorMessage = "" ; # no error
+	}
+
+	# Build a query of the users this user is following - we're only interested in their posts
+	$q = "SELECT * 
+		FROM users_users
+		WHERE user_id = ".$this->user->user_id;
+	
+	# Execute our query, storing the results in a variable $connections
+	$connections = DB::instance(DB_NAME)->select_rows($q);
+	
+	# In order to query for the posts we need, we're going to need a string of user id's, separated by commas
+	# To create this, loop through our connections array
+	$connections_string = "";
+	foreach($connections as $connection) {
+		$connections_string .= $connection['user_id_followed'].",";
+	}
+	
+	# Remove the final comma 
+	$connections_string = substr($connections_string, 0, -1);
+	
+	# Connections string example: 10,7,8 (where the numbers are the user_ids of who this user is following)
+
+	# Now, lets build our query to grab the posts
+	$q = "SELECT * 
+		FROM posts 
+		JOIN users USING (user_id)
+		WHERE posts.user_id IN (".$connections_string.")"; # This is where we use that string of user_ids we created
+				
+	# Run our query, store the results in the variable $posts
+	$posts = DB::instance(DB_NAME)->select_rows($q);
+	
+	# Pass data to the view
+	$this->template->content->posts = $posts;
+
+		# Render template
+		echo $this->template;
+	
+	}
+
 	
 	public function p_add() {
 			
+		if ($_POST['content'] !="" ) {
+		
 		# Associate this post with this user
 		$_POST['user_id']  = $this->user->user_id;
 		
@@ -43,13 +103,16 @@ class posts_controller extends base_controller {
 		# Insert
 		# Note we didn't have to sanitize any of the $_POST data because we're using the insert method which does it for us
 		DB::instance(DB_NAME)->insert('posts', $_POST);
+		# Return to the same calling page to view the recent addition
+		Router::redirect('/posts/index');
+
+		} else { #content blank error, no record added to the DB
+		Router::redirect('/posts/index/?error=blankContent');
+		}
 		
-		# Quick and dirty feedback
-		echo "Your post has been added. <a href='/posts/add'>Add another?</a>";
-	
 	}
 	
-	public function index() {
+	public function indexOld() {
 	
 	# Set up view
 	$this->template->content = View::instance('v_posts_index');

@@ -19,3 +19,9 @@
 	<? endforeach; ?>
 	
 </form>
+
+
+
+<br><br>
+
+<a href='/posts/'>Return to Viewing the Posts</a>	

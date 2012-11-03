@@ -54,14 +54,17 @@ table.doctable tbody td, table.informaltable tbody td {
 font-size: large;
 color: green;
 }
-
+#newPostContent {
+width: 500px;
+height: 50px;
+}
 form {
 border: 1px solid gray; 
 /* position isn't clear
 top: 250px;
 left: 10px;
 */
-width: 200px;
+width: 600px;
 padding-left: 6px;
 padding-right: 6px;
 padding-top: 0px;
@@ -76,6 +79,7 @@ color: red;
 h2 {
 margin-top: 5px;
 }
+/* LINK BEHAVIOR, REVERT TO DEFAULT FOR THE MOMENT.
 a:link {
 color: gray
 }
@@ -88,7 +92,7 @@ color: gray
 a:active {
 color: red
 }
-
+*/
 .humor {
 font-style: italic;
 }
