@@ -69,6 +69,10 @@ class users_controller extends base_controller {
 				
 				# ACTION REQUIRED: CONTINUE WITH AUTOLOGIN AT SUCCESSFUL signup
 				# easier alternative: redirect to login only page with a welcoming message!
+				#even easier, but UGLY, right back to this page without further ado.
+		
+				Router::redirect('/users/signupOrLogin/');
+
 
 			} else { # password too short
 				Router::redirect('/users/signupOrLogin/?error=signupPassword');
