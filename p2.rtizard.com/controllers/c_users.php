@@ -3,17 +3,19 @@ class users_controller extends base_controller {
 
 	public function __construct() {
 		parent::__construct();
-		$client_files = Array(
-				"/css/users.css",
-	            );
+		#Specific css is added to an array which already has one element from the parent constructor method.
+		#$this->$client_files[] = "/css/users.css"; # doesn't work so I use the following array_push invocation instead
+		array_push($this->client_files, "/css/users.css"); # this works
+		$this->template->client_files = Utils::load_client_files($this->client_files);   
 	
-        $this->template->client_files = Utils::load_client_files($client_files);   
-	
-		#echo "users_controller __construct() was called<br><br>";
 	} 
 		
 	public function index() {
-		echo "Welcome to the users's department";
+	if(!$this->user) {
+		Router::redirect('/users/signupOrLogin/');
+		} else {
+		Router::redirect('/posts/index/');
+		}
 	}
 		
 	public function signup() {
@@ -246,17 +248,18 @@ public function profile() {
  
     # If user is blank, they're not logged in, show message and don't do anything else
     if(!$this->user) {
-        echo "Members only. <a href='/users/login'>Login</a>";
-        
-        # Return will force this method to exit here so the rest of 
-        # the code won't be executed and the profile view won't be displayed.
-        return false;
+    	Router::redirect('/users/signupOrLogin/');
     }
-    
+	
     # Setup view
     $this->template->content = View::instance('v_users_profile');
     $this->template->title   = "Profile of ".$this->user->first_name;
-        
+    $this->menuArray = Array
+			("Change who you're following" => "/posts/users/", 
+			"View and Add Posts" => "/posts/", 
+			"Logout" => "/users/logout/",);
+	$this->template->content->menuArray = $this->menuArray;
+   
     # Render template
     echo $this->template;
 }

@@ -6,8 +6,9 @@ class base_controller {
 	public $userObj;
 	public $template;
 	public $email_template;
-	#public $error; # does this address my error handling problems at login?
-
+	public $client_files;
+	public $menuArray;
+	
 	/*-------------------------------------------------------------------------------------------------
 	
 	-------------------------------------------------------------------------------------------------*/
@@ -26,6 +27,14 @@ class base_controller {
 		# So we can use $user in views			
 			$this->template->set_global('user', $this->user);
 			
+		# Site wide css file becomes first element of array accessible in other controllers. The other controllers must augment
+		# and load the client files.
+		$this->client_files = Array(
+				"/css/sitewide.css",
+	            );
+		
+		$this->menuArray = Array("Change who you're following" => "/posts/users/", "Logout" => "/users/logout/", "View your profile" => "/users/profile/");
+
 	}
 	
 } # eoc

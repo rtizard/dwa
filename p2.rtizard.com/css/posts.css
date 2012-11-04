@@ -1,7 +1,16 @@
 /*
 RT's embryonic CSS file for posts
 */
+#newPostContent {
+width: 500px;
+height: 50px;
+}
 
+form { /* supersedes the sitewide css wrt width*/
+width: 600px;
+}
+
+/*
 body {
 font-family: Arial, sans-serif;
 color: blue;
@@ -48,22 +57,16 @@ table.doctable thead th, table.informaltable thead th {
 table.doctable tbody td, table.informaltable tbody td {
    background-color: #F0F0F0;
 }
-*/
 
 .formTitle {
 font-size: large;
 color: green;
-}
-#newPostContent {
-width: 500px;
-height: 50px;
 }
 form {
 border: 1px solid gray; 
 /* position isn't clear
 top: 250px;
 left: 10px;
-*/
 width: 600px;
 padding-left: 6px;
 padding-right: 6px;
@@ -92,7 +95,6 @@ color: gray
 a:active {
 color: red
 }
-*/
 .humor {
 font-style: italic;
 }
@@ -101,26 +103,4 @@ font-style: italic;
 color: #1BA8E0;
 }
 
-#toolkit {
-position: absolute;
-top: 65px;
-left: 680px;
-width: 500px;
-}
-
-#bio {
-position: absolute;
-background-color: rgba(25,25,50,0.7); /* Susan: This code makes the background translucent (70% opaque) w/o affecting the text */
-border: 1px solid white; 
-top: 250px;
-left: 10px;
-width: 572px;
-padding-left: 6px;
-padding-right: 6px;
-padding-top: 0px;
-padding-bottom: 6px;
-}
-
-#bio h2 {
-padding-top: 0px;
-}
+*/

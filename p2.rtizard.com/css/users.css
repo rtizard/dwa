@@ -2,77 +2,26 @@
 RT's embryonic CSS file for index view
 */
 
-body {
-font-family: Arial, sans-serif;
-}
 
-.formTitle {
-font-size: large;
-color: green;
-}
-
-form {
+#loginContainer {
+position: absolute;
+top: 100px;
+left: 100px;
+width: 700px;
+height: 550px;
 border: 1px solid gray; 
-/* position isn't clear
-top: 250px;
-left: 10px;
-*/
-width: 250px;
-padding-left: 6px;
-padding-right: 6px;
-padding-top: 0px;
-padding-bottom: 6px;
-font-size: small;
 }
 
-.error {
-color: red;
-}
 
-h2 {
-margin-top: 5px;
-}
-a:link {
-color: gray
-}
-a:visited {
-color: #BD84E3
-}
-a:hover {
-color: gray
-}
-a:active {
-color: red
-}
-
-.humor {
-font-style: italic;
-}
-
-.bullets {
-color: #1BA8E0;
-}
-
-#toolkit {
+#loginForm {
 position: absolute;
-top: 65px;
-left: 680px;
-width: 500px;
+top: 150px;
+left: 50px;
 }
 
-#bio {
+
+#signupForm {
 position: absolute;
-background-color: rgba(25,25,50,0.7); /* Susan: This code makes the background translucent (70% opaque) w/o affecting the text */
-border: 1px solid white; 
-top: 250px;
-left: 10px;
-width: 572px;
-padding-left: 6px;
-padding-right: 6px;
-padding-top: 0px;
-padding-bottom: 6px;
-}
-
-#bio h2 {
-padding-top: 0px;
+top: 150px;
+left: 350px;
 }

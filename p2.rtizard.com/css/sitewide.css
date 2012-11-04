@@ -1,0 +1,73 @@
+/*
+RT's embryonic CSS file for site-wide use
+*/
+
+
+body {
+font-family: Arial, sans-serif;
+}
+
+.formTitle {
+font-size: large;
+color: green;
+}
+
+.pageTitle {
+position: absolute;
+top: 50px;
+left: 50px; 
+}
+
+form {
+border: 1px solid gray; 
+/* position isn't defined here
+top: 250px;
+left: 10px;
+*/
+width: 250px;
+padding-left: 6px;
+padding-right: 6px;
+padding-top: 0px;
+padding-bottom: 6px;
+font-size: small;
+}
+
+.error {
+color: red;
+}
+
+h2 {
+margin-top: 5px;
+}
+
+table {
+border: 0px; 
+padding: 5px;
+}
+
+th {
+text-align: left;
+   background-color: #9999CC;
+color: white;
+padding: 0.2em;
+}
+
+.fixedWidth_column {
+width: 120px;
+}
+
+td {
+border: 1 px solid black;
+padding: 0.2em;
+text-align: left;
+background-color: #F0F0F0;
+color: #9999CC;
+color: gray;
+font-size: small;
+}
+
+.formTitle {
+font-size: large;
+color: green;
+
+}

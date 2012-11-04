@@ -1,4 +1,17 @@
-<h1>Profile</h1>
-<h2><?="Information for ".$user_name?></h2>
-<body>Test static text. Using object notation for name: <?=$user->first_name?>.
+<ul id="masterMenu">
+<? foreach($menuArray as $key => $value): ?>
+<li> <a href=<?=$value ?>><?=$key ?></a>
+<? endforeach; ?>
+</ul>
+
+<h1>Profile for <?=$user->first_name?> <?=$user->last_name?></h1>
+<body>
+Time stamp for user creation: <?=$user->created?>.<br>
+Member since: <?=$user->created?>.<br>
+Number of logins: <?=$user->numLogins?>.<br>
+Number of posts:<br>
+Number of people followed:<br>
+Number of followers:<br>
+Interests:<br>
+Current hometown:<br>
 </body>

@@ -1,3 +1,9 @@
+<ul id="masterMenu">
+<? foreach($menuArray as $key => $value): ?>
+<li> <a href=<?=$value ?>><?=$key ?></a>
+<? endforeach; ?>
+</ul>
+
 <form method='POST' action='/posts/p_follow'>
 		
 	<? foreach($users as $user): ?>
@@ -23,5 +29,3 @@
 
 
 <br><br>
-
-<a href='/posts/'>Return to Viewing the Posts</a>	

@@ -5,17 +5,15 @@ class posts_controller extends base_controller {
 	public function __construct() {
 		parent::__construct();
 		
-		$client_files = Array(
-				"/css/posts.css",
-	            );
-	
-        $this->template->client_files = Utils::load_client_files($client_files);   
+		#Specific css is added to an array which already has one element from the parent constructor method.
+		array_push($this->client_files, "/css/posts.css"); # this works
+		$this->template->client_files = Utils::load_client_files($this->client_files);   
 	
 		# Make sure user is logged in if they want to use anything in this controller
 		if(!$this->user) {
-			die("Members only. <a href='/users/signupOrLogin'>Return to Signup and Login Page</a>");
+		Router::redirect('/users/signupOrLogin/');
 		}
-		
+
 	}
 	
 	public function add() {
@@ -82,6 +80,12 @@ class posts_controller extends base_controller {
 	
 	# Pass data to the view
 	$this->template->content->posts = $posts;
+	#in testing: duplicate the line of code from c_base
+	$this->menuArray = Array
+			("Change who you're following" => "/posts/users/", 
+			"View your profile" => "/users/profile/",
+			"Logout" => "/users/logout/",);
+	$this->template->content->menuArray = $this->menuArray;
 
 		# Render template
 		echo $this->template;
@@ -181,6 +185,11 @@ class posts_controller extends base_controller {
 	# Pass data (users and connections) to the view
 	$this->template->content->users       = $users;
 	$this->template->content->connections = $connections;
+	$this->menuArray = Array
+			("View and Add Posts" => "/posts/", 
+			"View your profile" => "/users/profile/",
+			"Logout" => "/users/logout/",);
+	$this->template->content->menuArray = $this->menuArray;
 
 	# Render the view
 	echo $this->template;

@@ -1,4 +1,6 @@
-<form method='POST' action='/users/p_login'>
+<div id="loginContainer">
+<h1 class="pageTitle">Welcome to BlipTide!</h1>
+<form id="loginForm" method='POST' action='/users/p_login'>
 <p class="formTitle">Returning? Please log in.</p>
    
    Email<br>
@@ -23,8 +25,8 @@
  
 </form>
 <br><br>
-<div id="signupForm">
-<form method='POST' action='/users/p_signup'>
+
+<form id="signupForm" method='POST' action='/users/p_signup'>
 <p class="formTitle">New here? Please sign up.</p>
 
 	First Name<br>

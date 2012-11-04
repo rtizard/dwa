@@ -10,17 +10,17 @@ class index_controller extends base_controller {
 	Access via http://yourapp.com/index/index/
 	-------------------------------------------------------------------------------------------------*/
 	public function index() {
-if(!($this->user)) {
+		if(!($this->user)) {
 			# Send them to login or signup
-		Router::redirect("/users/signupOrLogin/");
+			Router::redirect("/users/signupOrLogin/");
 			
-	} else {
-			
-	# Send them onward, success
-		Router::redirect("/posts/index/");
-						
-	}
+			} else {
+					
+			# Send them onward, success
+				Router::redirect("/posts/index/");
+								
+			}
 
 	}
 			
-} // end class
+} // end of class
