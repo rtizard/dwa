@@ -258,12 +258,20 @@ public function profile() {
     # Setup view
     $this->template->content = View::instance('v_users_profile');
     $this->template->title   = "Profile of ".$this->user->first_name;
+    
     $this->menuArray = Array
 			("Change who you're following" => "/posts/users/", 
 			"View and Add Posts" => "/posts/", 
 			"Logout" => "/users/logout/",);
 	$this->template->content->menuArray = $this->menuArray;
-   
+	
+	# now the SQL-requiring values. First # of posts by the user. NOTE: COULDN'T GET COUNT SYNTAX RIGHT.
+	#$q = "SELECT user_id
+	#FROM posts
+	#where user_id=$this->user->user_id";
+	#$this->number_posted = DB::instance(DB_NAME)->select_field($q);
+	#$this->template->content->number_posted = $this->number_posted;
+
     # Render template
     echo $this->template;
 }

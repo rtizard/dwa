@@ -8,7 +8,8 @@ class base_controller {
 	public $email_template;
 	public $client_files;
 	public $menuArray;
-	
+	public $number_posted;
+
 	/*-------------------------------------------------------------------------------------------------
 	
 	-------------------------------------------------------------------------------------------------*/
@@ -32,7 +33,7 @@ class base_controller {
 		$this->client_files = Array(
 				"/css/sitewide.css",
 	            );
-		
+		#menuArray assignment left here as a breadcrumb: it is changed before page load to respond to the needs of each page.
 		$this->menuArray = Array("Change who you're following" => "/posts/users/", "Logout" => "/users/logout/", "View your profile" => "/users/profile/");
 
 	}

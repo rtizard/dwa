@@ -56,4 +56,5 @@
     <input type='submit' value="Submit">
 
 </form> 
+<p id='tinyNote'>Note that SB's email and 4 digit password from class will work</p>
 </div>
