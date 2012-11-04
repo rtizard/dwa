@@ -275,5 +275,5 @@ public function profile() {
     # Render template
     echo $this->template;
 }
- 	
+ 
 } # end of the class
