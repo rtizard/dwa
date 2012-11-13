@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<head>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+        <script type="text/javascript" src="/sequenceDisplay.js"></script>
+		<link rel="stylesheet" href="/sequenceDisplay.css" type="text/css">
+</head>
+
+<body>
+<a href='/index.html'>Go to proposal</a>
+
+<!-- Sequence Entry -->	
+<h2>Basic Sequence Analysis</h2>
+
+<p class='label'>Please paste in your sequence and tab or click out of the area. Editing by hand also works 
+(spaces and numbers will be removed):</p>
+<p><textarea name= "inputSequence" cols="50" id='sequenceInput' class ='sequenceDisplay'></textarea></p>
+<div class='error' id='sequenceError'></div>
+<div id='dataBox'>
+</div>
+<!-- Don't need this submit button currently
+<p><input type="submit" id="computePi" value = "compute pI" /></p>
+-->
+<div id='plainSequence' class ='sequenceDisplay'>
+</div>
+
+<div id='sequenceDisplay'>
+    <div id='comment'>
+  </div>
+  <div id='styledSequence' class ='sequenceDisplay'>
+  </div>
+</div>
+
+
+<div id='residueButtons'>
+</div>
+ 
+</body>
+</html>
+
+
