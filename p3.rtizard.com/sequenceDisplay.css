@@ -39,17 +39,20 @@ word-wrap: break-word;
 position: absolute;
 top: 65px;
 left: 600px;
-width: 60px;
+width: 30px;
 }
 
 .button {
-width: 30px;
-height: 20px;
+width: 20px;
+height: 18px;
 border: 1px solid gray;
 text-align: center;
-padding-top: 4px;
-border-radius: 8px;
-background-color: yellow;
+padding-top: 0px;
+border-radius: 6px;
+background-color: #69D2E7;
+margin-top: 2px;
+cursor:pointer;
+	
 }
 
 .red {

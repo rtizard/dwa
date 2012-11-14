@@ -210,11 +210,9 @@ var aminoAcid_pK = {//note this is a remnant of the old parallel array system. w
 	"Cterminus":3.56,
 };
 
-
-
 //strippedSequence: an additional variable available everywhere within "ready" -- pseudo global
-var strippedSequence;
-
+var strippedSequence = '';
+var aaPropertyDisplay = 'count';//need to build a pull-down menu to select this. Or radio buttons, in fact, for starters.
 //easier to create the buttons in code than in html and on page load!
 drawResidueButtons();
 
@@ -239,6 +237,7 @@ $('#sequenceInput').blur(function() { //Note that Safari and Chrome run this cod
     var newpI = newComputePi();
     //var extinction = computeExtinctionCoefficient();
     var newExtinction = newComputeExtinctionCoefficient();
+    determineButtonBckgrnd();
     messageDatabox = 'Chain length is '+strippedSequence.length+'<br>';
     //messageDatabox+='Molecular Weight is '+MW+'<br>';
     messageDatabox+='New Molecular Weight is '+newMW+'<br>';
@@ -246,6 +245,7 @@ $('#sequenceInput').blur(function() { //Note that Safari and Chrome run this cod
     messageDatabox+='New Estimated isoelectric point (pI) is '+newpI+'<br>'; //Add the pI value
     //messageDatabox+='Estimated extinction coefficient is '+extinction+'<br>'; //Add the Extinction coefficient value
     messageDatabox+='New extinction coefficient is '+newExtinction+'<br>'; //Add the Extinction coefficient value
+    
 
 	} else {
 	messageDatabox = 'No valid sequence characters were input. Try again?<br>';
@@ -269,20 +269,112 @@ function drawResidueButtons(){
 
 	$('.button').live("click",function(){
 		var letter = $(this).html();
-		console.log(letter+" button clicked");
+		//console.log(letter+" button clicked");
+		//console.log ("strippedSequence is "+strippedSequence);
+		if (strippedSequence!=""){
 		var re = new RegExp(letter, "g");
 		var styledVersion = getStyledSequence();//this obliterates earlier stuff done to the sequence, added <span> tags at this point.
 		var numberFound = styledVersion.match(re);
-		console.log (numberFound);
+// 		console.log (numberFound);
 		var annotatedSequence = styledVersion.replace(re, '<span class="red">'+letter+'</span>'	);//since we've made strippedSequence we might as well use it here.
 		$('#styledSequence').html(annotatedSequence);
 		$('#comment').html('<span class="red">'+letter+'</span> was found '+ numberFound.length +' times.');
 		//Return any pre-existing buttons colored red back to black
 		$('.button').css('color','black');
 		//now turn this button red
-		$(this).css('color','red'); 
+		$(this).css('color','red');
+		}
 		return false;
 	});
+
+
+$('input[name=propertyType]').click(function() {
+	//the 'global' variable to match radio button selected.
+	  aaPropertyDisplay = $(this).attr('value');
+		console.log(aaPropertyDisplay);
+		determineButtonBckgrnd(); // make the changes to background of buttons
+			//
+// 			now execute function to match the radio button intent
+		
+});
+
+	// $('.button').live("mouseenter",function(){
+// 	 console.log("mouseenter detected"); 
+//   });
+//   
+// 	$('.button').live("mouseleave",function(){
+// 	 console.log("mouseleave detected"); 
+//   });
+  
+  
+  
+function determineButtonBckgrnd(){
+  var maxValue = 0;
+//for now use mol wt as the determinator. Later we can add pK, count, Extinction, others?
+  
+  //first determine max value for whatever
+  console.log ('aaPropertyDisplay is '+aaPropertyDisplay);
+switch(aaPropertyDisplay) {
+case 'molWt': // Start here if n === 1
+  
+  for(key in aa_array) {
+//     console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].molWt);
+    if(aa_array[key].molWt>maxValue){
+    maxValue = aa_array[key].molWt;
+    }
+	}
+  // now that we know the maximum value, we can compare all others to this and use the opacity of the button to reflect the ratio.
+  for(key in aa_array) {
+  		$('#'+aa_array[key].oneLetter).css('backgroundColor','rgba(255,0,0,'+0.6*aa_array[key].molWt/maxValue+')');
+  }
+break;
+
+case 'pK': // Start here if n === 2
+for(key in aa_array) {
+     console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].pK);
+    if(aa_array[key].pK>maxValue){
+    maxValue = aa_array[key].pK;
+    }
+	}
+  // now that we know the maximum value, we can compare all others to this and use the opacity of the button to reflect the ratio.
+  for(key in aa_array) {
+  		$('#'+aa_array[key].oneLetter).css('backgroundColor','rgba(0,255,0,'+0.6*aa_array[key].pK/maxValue+')');
+  }
+break; // Stop here
+
+case 'extinction': // Start here if n === 3
+for(key in aa_array) {
+    console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].extinction);
+    if(aa_array[key].extinction>maxValue){
+    maxValue = aa_array[key].extinction;
+    }
+	}
+  // now that we know the maximum value, we can compare all others to this and use the opacity of the button to reflect the ratio.
+  for(key in aa_array) {
+  		$('#'+aa_array[key].oneLetter).css('backgroundColor','rgba(0,0,255,'+0.6*aa_array[key].extinction/maxValue+')');
+  }
+break; // Stop here
+
+case 'count': // Start here if n === 3
+for(key in aa_array) {
+    console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].molWt);
+    if(aa_array[key].count>maxValue){
+    maxValue = aa_array[key].count;
+    }
+	}
+  // now that we know the maximum value, we can compare all others to this and use the opacity of the button to reflect the ratio.
+  for(key in aa_array) {
+  		$('#'+aa_array[key].oneLetter).css('backgroundColor','rgba(120,60,0,'+0.6*aa_array[key].count/maxValue+')');
+  }
+break;
+
+default: // If all else fails...
+console.log("unrecognized property value selected from radio buttons.")
+// Execute code block #4.
+break; // stop here
+}
+
+}   //END determineButtonBckgrnd
 
 function getStyledSequence() {  // for now strips out spaces, coordinate numbers, etc. without styling the sequence. COME BACK.
 
@@ -290,9 +382,9 @@ function getStyledSequence() {  // for now strips out spaces, coordinate numbers
 	var re = new RegExp('[ACDEFGHIKLMNPQRSTVWY]', "g");//filters out all but 20 valid amino acid codes
 	var workingSequence=$('#sequenceInput').val();
 	workingSequence = workingSequence.toUpperCase();
-console.log("workingSequence is "+ workingSequence);
+//console.log("workingSequence is "+ workingSequence);
 	var	basicSequence = workingSequence.match(re);//basicSequence is an object with single character values: "RATE" -> "R","A","T","E"
-console.log("basicSequence is "+ basicSequence);//char,char,char,char,
+//console.log("basicSequence is "+ basicSequence);//char,char,char,char,
 //console.log("basicSequence.length is "+ basicSequence.length);  //string of length 2X sequence
 	
 	if (basicSequence!=null){
@@ -301,7 +393,7 @@ console.log("basicSequence is "+ basicSequence);//char,char,char,char,
     strippedSequence = "";
 	}
 	
-	$('#plainSequence').html(strippedSequence);//put the stripped (no spaces, numbers, just pure sequence) seq into plainSequence for the time being
+	//$('#plainSequence').html(strippedSequence);//put the stripped (no spaces, numbers, just pure sequence) seq into plainSequence for the time being
 	
 	//NOW work seriously on styling the sequence for display
 	var numFullLines = strippedSequence.length/50;
@@ -325,8 +417,9 @@ console.log("basicSequence is "+ basicSequence);//char,char,char,char,
 	for ( i=0; i<numFullLines; i++){
 		styledVersion += IndexLine;
 		next50 = strippedSequence.substring(i*50,(i+1)*50);
-		styledVersion += next50+"&nbsp&nbsp"+(i+1)*50+'<br><br>';
-	}
+		styledVersion += next50+"&nbsp&nbsp"+(i+1)*50+'<br>';
+		//styledVersion += next50+"&nbsp&nbsp"+(i+1)*50+'<br><br>';
+  }
 	
 	if(partialLineLength!=0){
 		//truncate index line appropriately:
@@ -389,8 +482,8 @@ function newComputeMW() {
 			}
 
 		aa_array[key].count = residueCount;
-		console.log('residueCount for '+aa_array[key].oneLetter+' = '+residueCount);
-		console.log('aa_array[key].count for '+aa_array[key].oneLetter+' = '+aa_array[key].count);
+	// 	console.log('residueCount for '+aa_array[key].oneLetter+' = '+residueCount);
+// 		console.log('aa_array[key].count for '+aa_array[key].oneLetter+' = '+aa_array[key].count);
 
 	} // end For
 

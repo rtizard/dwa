@@ -9,7 +9,7 @@
 <a href='/index.html'>Go to proposal</a>
 
 <!-- Sequence Entry -->	
-<h2>Basic Sequence Analysis</h2>
+<h2>Basic Protein Sequence Analysis</h2>
 
 <p class='label'>Please paste in your sequence and tab or click out of the area. Editing by hand also works 
 (spaces and numbers will be removed):</p>
@@ -34,7 +34,13 @@
 <div id='residueButtons'>
 </div>
  
+<div id='radioButtons'>
+  <input type='radio' name='propertyType' value='count' checked><label for='count'>&nbsp;Incidence Count</label><br>
+  <input type='radio' name='propertyType' value='molWt'><label for='molwt'>&nbsp;Molecular weight</label><br>
+  <input type='radio' name='propertyType' value='pK'><label for='pk'>&nbsp;pK</label><br>
+  <input type='radio' name='propertyType' value='extinction'><label for='extinction'>&nbsp;Extinction coefficient</label><br>	
+</div>
+
 </body>
 </html>
-
 
