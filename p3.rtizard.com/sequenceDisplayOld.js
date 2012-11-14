@@ -158,7 +158,7 @@ oneLetter:'S',
 threeLetter:'Ser',
 name:'Serine',
 molWt: 87.08,
-pK: 0,
+pK: 12.5,
 extinction: 0,
 count: 0,
 };
@@ -203,23 +203,119 @@ extinction: 1490,
 count: 0,
 };
 
-var aa_array = [A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y]; // an array of the 20 objects just created
 
-var aminoAcid_pK = {//note this is a remnant of the old parallel array system. works fine for N and C termini.
+var aa_array = [A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y];
+var temp;
+for ( temp in aa_array){
+  console.log ('temp is '+temp);
+  console.log ('aa_array sub temp name is '+aa_array[temp].name+' ');
+}
+
+//console.log("aminoAcid_pK was loaded");
+var aminoAcid_MW = {
+	"A":71.08,
+	"C":103.14,
+	"D":115.09,
+	"E":129.11,
+	"F":147.17,
+	"G":57.05,
+	"H":137.14,
+	"I":113.16,
+	"K":128.17,
+	"L":113.16,
+	"M":131.19,
+	"N":114.1,
+	"P":97.11,
+	"Q":128.13,
+	"R":156.18,
+	"S":87.08,
+	"T":101.1,
+	"V":99.13,
+	"W":186.21,
+	"Y":163.17
+};
+
+var aminoAcid_pK = {
+	"A":0,					//note entries with value 0 could be removed without affecting pI computation, leaving us with 7 non-zero
+	"C":8.3,				//but we'll leave all zero entries in in case we choose to create a quiz or a learning tool
+	"D":3.91,				//Note also the pK for Nterminus and Cterminus make this array larger than the others
+	"E":4.25,
+	"F":0,
+	"G":0,
+	"H":6.5,
+	"I":0,
+	"K":10.79,
+	"L":0,
+	"M":0,
+	"N":0,
+	"P":0,
+	"Q":0,
+	"R":12.5,
+	"S":0,
+	"T":0,
+	"V":0,
+	"W":0,
+	"Y":10.95,
 	"Nterminus":8.56,
 	"Cterminus":3.56,
 };
 
+var aminoAcid_Extinction = { //Note that only 3 amino acids--W > Y >> K--absorb light at wavelength of 280nm
+	"A":0,
+	"C":0,
+	"D":0,
+	"E":0,
+	"F":0,
+	"G":0,
+	"H":0,
+	"I":0,
+	"K":10,
+	"L":0,
+	"M":0,
+	"N":0,
+	"P":0,
+	"Q":0,
+	"R":0,
+	"S":0,
+	"T":0,
+	"V":0,
+	"W":5500,
+	"Y":1490
+};
 
 
-//strippedSequence: an additional variable available everywhere within "ready" -- pseudo global
+var aminoAcid_Count = {
+	"A":0,
+	"C":0,
+	"D":0,
+	"E":0,
+	"F":0,
+	"G":0,
+	"H":0,
+	"I":0,
+	"K":0,
+	"L":0,
+	"M":0,
+	"N":0,
+	"P":0,
+	"Q":0,
+	"R":0,
+	"S":0,
+	"T":0,
+	"V":0,
+	"W":0,
+	"Y":0
+};
+
+
+//variables available everywhere within "ready" -- pseudo global
 var strippedSequence;
-
-//easier to create the buttons in code than in html and on page load!
+//easier to create the buttons in code than in html!
 drawResidueButtons();
+//console.log('A.name is '+A.name);
 
 
-$('#sequenceInput').blur(function() { //Note that Safari and Chrome run this code on blur. Firefox does not. Why not? Need general method.
+$('#sequenceInput').blur(function() { //Note that Safari and Chrome run this code on blur. Firefox does not. Need general method.
 	console.log("blur detected");
 	$('#comment').html('');// New sequence: clear any pre-existing comment ("H was found x times")
 	$('.button').css('color','black');// New sequence: return all buttons to black
@@ -227,26 +323,22 @@ $('#sequenceInput').blur(function() { //Note that Safari and Chrome run this cod
 		// now that the sequence will be available, allow the browser to set the height of that element
 	$('#styledSequence').css({'height':'auto'});
 
-	// getStyledSequence does not need the new aa objects ACDE...
+	// getStyledSequence does not use the new aa objects A,C,D, etc.
 	var styledVersion = getStyledSequence();
 
 	var messageDatabox ="";
 	 
 	if (strippedSequence!="") {
-		//var MW = computeMW();
+		var MW = computeMW();
 		var newMW = newComputeMW(); //using the aa objects, compare with MW to find typos and thinkos
-    //var pI = computePi();
-    var newpI = newComputePi();
-    //var extinction = computeExtinctionCoefficient();
-    var newExtinction = newComputeExtinctionCoefficient();
+    var pI = computePi();
+    var Extinction = computeExtinctionCoefficient();
     messageDatabox = 'Chain length is '+strippedSequence.length+'<br>';
-    //messageDatabox+='Molecular Weight is '+MW+'<br>';
+    messageDatabox+='Molecular Weight is '+MW+'<br>';
     messageDatabox+='New Molecular Weight is '+newMW+'<br>';
-    //messageDatabox+='Estimated isoelectric point (pI) is '+pI+'<br>'; //Add the pI value
-    messageDatabox+='New Estimated isoelectric point (pI) is '+newpI+'<br>'; //Add the pI value
-    //messageDatabox+='Estimated extinction coefficient is '+extinction+'<br>'; //Add the Extinction coefficient value
-    messageDatabox+='New extinction coefficient is '+newExtinction+'<br>'; //Add the Extinction coefficient value
-
+    messageDatabox+='Estimated isoelectric point (pI) is '+pI+'<br>'; //Add the pI value
+    messageDatabox+='Estimated extinction coefficient is '+Extinction+'<br>'; //Add the Extinction coefficient value
+    
 	} else {
 	messageDatabox = 'No valid sequence characters were input. Try again?<br>';
 	}
@@ -254,13 +346,13 @@ $('#sequenceInput').blur(function() { //Note that Safari and Chrome run this cod
 	$('#dataBox').html(messageDatabox);
   $('#styledSequence').html(styledVersion);
     
-}); // END of .blur function
+});
 	
 function drawResidueButtons(){
 	var newHtml="";
 	
-	for(key in aa_array) {
-	  newHtml += '<div class="button" id="'+aa_array[key].oneLetter+'">'+aa_array[key].oneLetter+'</div>';
+	for(key in aminoAcid_Count) {
+	  newHtml += '<div class="button" id="'+key+'">'+key+'</div>';
 	}
 		
 	console.log(newHtml);
@@ -311,9 +403,7 @@ console.log("basicSequence is "+ basicSequence);//char,char,char,char,
 	var partialLineLength = strippedSequence.length % 50;
 	console.log('numFullLines = '+numFullLines+'  partialLineLength ='+ partialLineLength);
 	var styledVersion = '';
-	var IndexLine = "";
-	
-	//Compose a 50-long index line with ticks every 10 residues. Regular spaces collapse, so use &nbsp.
+	var IndexLine = "";//need to compose a 50-long index line with ticks every 10 residues. Regular spaces collapse. &nbsp OK.
 	
 	for ( var i=0; i<5; i++){
 		IndexLine +="&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp.";
@@ -354,19 +444,45 @@ console.log("basicSequence is "+ basicSequence);//char,char,char,char,
 	return styledVersion;
 }// END OF getStyledSequence
 
-function newComputeExtinctionCoefficient() {
+function computeExtinctionCoefficient() {
 	var extinctionCoefficient = 0;
 	
-	for(key in aa_array) {
-    extinctionCoefficient+=aa_array[key].extinction *aa_array[key].count;
+	for(key in aminoAcid_Count) {
+	extinctionCoefficient+=aminoAcid_Count[key]*aminoAcid_Extinction[key];
 	}
 	
 return (Math.round(extinctionCoefficient*1000))/1000;//round off to 3 places to the right of the decimal
 
-} //End of newComputeExtinctionCoefficient()
+} //End of computeExtinctionCoefficient()
 
+function computeMW() {
+	var residueCount = 0;
+	var residueMatch = "";
+	
+	for(key in aminoAcid_Count) {
+		re = new RegExp(key, "g");
+		residueMatch = strippedSequence.match(re);//since we've made strippedSequence we might as well use it here.
 
-//NEW METHOD, first of batch using the ACDE... objects instead of parallel arrays
+		if(residueMatch!==null) {
+			residueCount = residueMatch.length;
+			} else {
+			residueCount=0;
+			}
+
+		aminoAcid_Count[key] = residueCount;
+	} // end For
+
+  //now do the molecular weight (MW) determination
+  var molecularWeight = 0;
+
+	for(key in aminoAcid_Count) {
+	  molecularWeight+=aminoAcid_Count[key]*aminoAcid_MW[key];
+	}
+	
+  return (Math.round(molecularWeight*1000))/1000;//round off to 3 places to the right of the decimal
+
+} //END OF FUNCTION computeMW
+
 function newComputeMW() {
   var key;
   var residueCount;
@@ -406,9 +522,7 @@ function newComputeMW() {
 
 }
 
-
-// function newComputePi: only difference required is calling different calcChargeAtpH routine using ACDE... objects
-function newComputePi() {
+function computePi() {
 	// Start at pH 7. Determine charge, contributed by N and C termini and charged amino acid side chains (performed by calcChargeAtpH).
 	// Adjust pH upward or downward by currentStep and recompute the charge. Step in the correct direction again, this
 	// time stepping 1/2 as far.
@@ -422,7 +536,7 @@ function newComputePi() {
 	while (lastCharge!=crntCharge) {
 		console.log("pH="+current_pH+"  crntCharge="+crntCharge);
 		lastCharge=crntCharge;
-		crntCharge=newCalcChargeAtpH(current_pH);
+		crntCharge=calcChargeAtpH(current_pH);
 		crntCharge=(Math.round(crntCharge*1000))/1000; //round off to 3 places to the right of the decimal
 		
 		if (crntCharge>0){
@@ -444,20 +558,20 @@ function newComputePi() {
 } // END OF FUNCTION computePi
 
 
-function newCalcChargeAtpH(current_pH) {
+function calcChargeAtpH(current_pH) {
 
   //# it's the sum of all the partial charges for the
-  //# termini and all of the charged aa's, use the remnant of the aminoAcid_pK array for N and C terminus values, otherwise: ACDE... objects.
-
+  //# termini and all of the charged aa's
+ 
  var $charge = partialCharge(aminoAcid_pK['Nterminus'], current_pH )//This is a positive contributor, one N terminus/molecule
  	- partialCharge(current_pH,aminoAcid_pK['Cterminus'] )	//negative, one C terminus/molecule
-  	+ K.count * partialCharge(K.pK,current_pH)// positive, charge for single residue times the residue count
-    + R.count * partialCharge(R.pK,current_pH)// positive
-    + H.count * partialCharge(H.pK,current_pH)// positive
-    - D.count * partialCharge(current_pH,D.pK)//negative
-    - E.count * partialCharge(current_pH,E.pK)//negative
-    - C.count * partialCharge(current_pH,C.pK)//negative
-    - Y.count * partialCharge(current_pH,Y.pK); //negative
+  	+ aminoAcid_Count['K'] * partialCharge(aminoAcid_pK['K'],current_pH)// positive, charge for single residue times the residue count
+    + aminoAcid_Count['R'] * partialCharge(aminoAcid_pK['R'],current_pH)// positive
+    + aminoAcid_Count['H'] * partialCharge(aminoAcid_pK['H'],current_pH)// positive
+    - aminoAcid_Count['D'] * partialCharge(current_pH,aminoAcid_pK['D'])//negative
+    - aminoAcid_Count['E'] * partialCharge(current_pH,aminoAcid_pK['E'])//negative
+    - aminoAcid_Count['C'] * partialCharge(current_pH,aminoAcid_pK['C'])//negative
+    - aminoAcid_Count['Y'] * partialCharge(current_pH,aminoAcid_pK['Y']); //negative
     return ($charge);
 }
 

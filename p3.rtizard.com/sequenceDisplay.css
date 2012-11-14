@@ -13,6 +13,10 @@ padding: 10px;
 height: 300px;
 }
 
+#styledSequence{
+height: 300px; /* will be overridden once sequence becomes available */
+}
+
 .label {
 width: 500px;
 }
@@ -44,6 +48,8 @@ height: 20px;
 border: 1px solid gray;
 text-align: center;
 padding-top: 4px;
+border-radius: 8px;
+background-color: yellow;
 }
 
 .red {
