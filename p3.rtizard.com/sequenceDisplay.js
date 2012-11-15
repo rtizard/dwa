@@ -364,7 +364,7 @@ for(key in aa_array) {
 	}
   // now that we know the maximum value, we can compare all others to this and use the opacity of the button to reflect the ratio.
   for(key in aa_array) {
-  		$('#'+aa_array[key].oneLetter).css('backgroundColor','rgba(120,60,0,'+0.6*aa_array[key].count/maxValue+')');
+  		$('#'+aa_array[key].oneLetter).css('backgroundColor','rgba(255,0,255,'+0.6*aa_array[key].count/maxValue+')');
   }
 break;
 

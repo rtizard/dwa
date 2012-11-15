@@ -21,6 +21,11 @@ height: 300px; /* will be overridden once sequence becomes available */
 width: 500px;
 }
 
+.instruction {
+width: 500px;
+}
+
+
 #sequenceDisplay {
 position: absolute;
 top: 65px;
