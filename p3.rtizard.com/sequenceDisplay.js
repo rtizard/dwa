@@ -1,7 +1,10 @@
 //initialize values, this needn't wait for page load to be complete
 $(document).ready(function() {
 
-//Trying to use A as an example of an object to keep all these properties:
+//20 objects, one for each amino acid, store their properties.
+//Each will have a name, a one letter code, a three letter code, and a molecular weight.
+//Zero for pK indicates that the side groups are uncharged. Acidic side groups have pKs less than 7, basic greater than 7
+//Zero for extinction indicates that the side groups don't absorb UV light at 280nm (only W and Y and, slightly, K do so).
 
 var A = {
 oneLetter:'A',
@@ -210,15 +213,16 @@ var aminoAcid_pK = {//note this is a remnant of the old parallel array system. w
 	"Cterminus":3.56,
 };
 
-//strippedSequence: an additional variable available everywhere within "ready" -- pseudo global
+//strippedSequence: an additional variable available everywhere within "ready" 
 var strippedSequence = '';
 var aaPropertyDisplay = 'count';//need to build a pull-down menu to select this. Or radio buttons, in fact, for starters.
+
 //easier to create the buttons in code than in html and on page load!
 drawResidueButtons();
 
 
 $('#sequenceInput').blur(function() { //Note that Safari and Chrome run this code on blur. Firefox does not. Why not? Need general method.
-	console.log("blur detected");
+//	console.log("blur detected");
 	$('#comment').html('');// New sequence: clear any pre-existing comment ("H was found x times")
 	$('.button').css('color','black');// New sequence: return all buttons to black
 
@@ -231,19 +235,13 @@ $('#sequenceInput').blur(function() { //Note that Safari and Chrome run this cod
 	var messageDatabox ="";
 	 
 	if (strippedSequence!="") {
-		//var MW = computeMW();
 		var newMW = newComputeMW(); //using the aa objects, compare with MW to find typos and thinkos
-    //var pI = computePi();
     var newpI = newComputePi();
-    //var extinction = computeExtinctionCoefficient();
     var newExtinction = newComputeExtinctionCoefficient();
     determineButtonBckgrnd();
     messageDatabox = 'Chain length is '+strippedSequence.length+'<br>';
-    //messageDatabox+='Molecular Weight is '+MW+'<br>';
     messageDatabox+='New Molecular Weight is '+newMW+'<br>';
-    //messageDatabox+='Estimated isoelectric point (pI) is '+pI+'<br>'; //Add the pI value
     messageDatabox+='New Estimated isoelectric point (pI) is '+newpI+'<br>'; //Add the pI value
-    //messageDatabox+='Estimated extinction coefficient is '+extinction+'<br>'; //Add the Extinction coefficient value
     messageDatabox+='New extinction coefficient is '+newExtinction+'<br>'; //Add the Extinction coefficient value
     
 
@@ -263,19 +261,16 @@ function drawResidueButtons(){
 	  newHtml += '<div class="button" id="'+aa_array[key].oneLetter+'">'+aa_array[key].oneLetter+'</div>';
 	}
 		
-	console.log(newHtml);
+	// console.log(newHtml);
 	$('#residueButtons').html(newHtml);	
 }               //End of drawResidueButtons	
 
 	$('.button').live("click",function(){
 		var letter = $(this).html();
-		//console.log(letter+" button clicked");
-		//console.log ("strippedSequence is "+strippedSequence);
 		if (strippedSequence!=""){
 		var re = new RegExp(letter, "g");
 		var styledVersion = getStyledSequence();//this obliterates earlier stuff done to the sequence, added <span> tags at this point.
 		var numberFound = styledVersion.match(re);
-// 		console.log (numberFound);
 		var annotatedSequence = styledVersion.replace(re, '<span class="red">'+letter+'</span>'	);//since we've made strippedSequence we might as well use it here.
 		$('#styledSequence').html(annotatedSequence);
 		$('#comment').html('<span class="red">'+letter+'</span> was found '+ numberFound.length +' times.');
@@ -291,10 +286,8 @@ function drawResidueButtons(){
 $('input[name=propertyType]').click(function() {
 	//the 'global' variable to match radio button selected.
 	  aaPropertyDisplay = $(this).attr('value');
-		console.log(aaPropertyDisplay);
+		// console.log(aaPropertyDisplay);
 		determineButtonBckgrnd(); // make the changes to background of buttons
-			//
-// 			now execute function to match the radio button intent
 		
 });
 
@@ -310,12 +303,10 @@ $('input[name=propertyType]').click(function() {
   
 function determineButtonBckgrnd(){
   var maxValue = 0;
-//for now use mol wt as the determinator. Later we can add pK, count, Extinction, others?
   
   //first determine max value for whatever
-  console.log ('aaPropertyDisplay is '+aaPropertyDisplay);
 switch(aaPropertyDisplay) {
-case 'molWt': // Start here if n === 1
+case 'molWt': 
   
   for(key in aa_array) {
 //     console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].molWt);
@@ -329,9 +320,9 @@ case 'molWt': // Start here if n === 1
   }
 break;
 
-case 'pK': // Start here if n === 2
+case 'pK': 
 for(key in aa_array) {
-     console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].pK);
+     // console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].pK);
     if(aa_array[key].pK>maxValue){
     maxValue = aa_array[key].pK;
     }
@@ -342,9 +333,9 @@ for(key in aa_array) {
   }
 break; // Stop here
 
-case 'extinction': // Start here if n === 3
+case 'extinction': 
 for(key in aa_array) {
-    console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].extinction);
+    // console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].extinction);
     if(aa_array[key].extinction>maxValue){
     maxValue = aa_array[key].extinction;
     }
@@ -355,9 +346,9 @@ for(key in aa_array) {
   }
 break; // Stop here
 
-case 'count': // Start here if n === 3
+case 'count': 
 for(key in aa_array) {
-    console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].molWt);
+    // console.log ('maxValue is ' + maxValue+ ' and next value is '+aa_array[key].molWt);
     if(aa_array[key].count>maxValue){
     maxValue = aa_array[key].count;
     }
@@ -368,9 +359,8 @@ for(key in aa_array) {
   }
 break;
 
-default: // If all else fails...
-console.log("unrecognized property value selected from radio buttons.")
-// Execute code block #4.
+default: 
+// console.log("unrecognized property value selected from radio buttons.")
 break; // stop here
 }
 
@@ -382,10 +372,7 @@ function getStyledSequence() {  // for now strips out spaces, coordinate numbers
 	var re = new RegExp('[ACDEFGHIKLMNPQRSTVWY]', "g");//filters out all but 20 valid amino acid codes
 	var workingSequence=$('#sequenceInput').val();
 	workingSequence = workingSequence.toUpperCase();
-//console.log("workingSequence is "+ workingSequence);
 	var	basicSequence = workingSequence.match(re);//basicSequence is an object with single character values: "RATE" -> "R","A","T","E"
-//console.log("basicSequence is "+ basicSequence);//char,char,char,char,
-//console.log("basicSequence.length is "+ basicSequence.length);  //string of length 2X sequence
 	
 	if (basicSequence!=null){
   	strippedSequence = basicSequence.join('');
@@ -397,11 +384,9 @@ function getStyledSequence() {  // for now strips out spaces, coordinate numbers
 	
 	//NOW work seriously on styling the sequence for display
 	var numFullLines = strippedSequence.length/50;
-	console.log('numFullLines before rounding = '+numFullLines);
 	var numFullLines = Math.floor(numFullLines);
 
 	var partialLineLength = strippedSequence.length % 50;
-	console.log('numFullLines = '+numFullLines+'  partialLineLength ='+ partialLineLength);
 	var styledVersion = '';
 	var IndexLine = "";
 	
@@ -423,10 +408,9 @@ function getStyledSequence() {  // for now strips out spaces, coordinate numbers
 	
 	if(partialLineLength!=0){
 		//truncate index line appropriately:
-		console.log(partialLineLength);
 		IndexLine = '';//prepare to customize an index line for the less-than-50 residue line
 		next50 = strippedSequence.substring((numFullLines)*50);//will be padded later
-		console.log('next50 before padding ='+next50);
+		
 		for(i=0; i<partialLineLength; i++){
 			
 			if((i+1)%10==0){
@@ -435,15 +419,14 @@ function getStyledSequence() {  // for now strips out spaces, coordinate numbers
 			IndexLine += '&nbsp';
 			}
 		}
-		console.log('partialLineLength = '+partialLineLength);
 		for(i=partialLineLength; i<50; i++){  //NOW pad out the sequence line so that co-ordinates in right margin line up.
 		next50 += '&nbsp';
 		}
-		console.log("IndexLine ="+IndexLine);
 		styledVersion += IndexLine+'<br>';
 		styledVersion += next50+"&nbsp&nbsp"+strippedSequence.length+'<br><br>';
 
 	} //end IF
+	
 	return styledVersion;
 }// END OF getStyledSequence
 
@@ -464,12 +447,6 @@ function newComputeMW() {
   var key;
   var residueCount;
 	var residueMatch;
-			console.log('entering newComputeMW');
-
-	for ( temp in aa_array){
-  console.log ('temp is '+temp);
-  console.log ('aa_array sub temp name is '+aa_array[temp].oneLetter+' ');
-}
 
 	for(key in aa_array) {
 		re = new RegExp(aa_array[key].oneLetter, "g");
@@ -482,8 +459,6 @@ function newComputeMW() {
 			}
 
 		aa_array[key].count = residueCount;
-	// 	console.log('residueCount for '+aa_array[key].oneLetter+' = '+residueCount);
-// 		console.log('aa_array[key].count for '+aa_array[key].oneLetter+' = '+aa_array[key].count);
 
 	} // end For
 
@@ -495,9 +470,7 @@ function newComputeMW() {
 	}
 	
   return (Math.round(molecularWeight*1000))/1000;//round off to 3 places to the right of the decimal
-
-
-}
+} //END OF newComputeMW
 
 
 // function newComputePi: only difference required is calling different calcChargeAtpH routine using ACDE... objects
@@ -513,7 +486,7 @@ function newComputePi() {
 	var crntCharge=1;  //something different from lastCharge to force once through the while loop
 	
 	while (lastCharge!=crntCharge) {
-		console.log("pH="+current_pH+"  crntCharge="+crntCharge);
+// 		console.log("pH="+current_pH+"  crntCharge="+crntCharge); // this is amusing to review in the console
 		lastCharge=crntCharge;
 		crntCharge=newCalcChargeAtpH(current_pH);
 		crntCharge=(Math.round(crntCharge*1000))/1000; //round off to 3 places to the right of the decimal
@@ -529,11 +502,7 @@ function newComputePi() {
 	
 	return((Math.round(1000*current_pH))/1000);//rounded to 3 places after the decimal point
 	
-	// Final value has been reached: current_pH is our PI
-	//var messageDatabox = $('#dataBox').html(messageDatabox);//fetch current value of the data box message
-	//messageDatabox+='<br>Estimated isoelectric point (pI) is '+(Math.round(1000*current_pH))/1000; //Add the pI value
-	//$('#dataBox').html(messageDatabox); // write back the augmented value
-	
+
 } // END OF FUNCTION computePi
 
 
