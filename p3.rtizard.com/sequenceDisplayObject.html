@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <head>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
-  <script type="text/javascript" src="/sequenceDisplay.js"></script>
+  <script type="text/javascript" src="/sequenceDisplayObject.js"></script>
 	<link rel="stylesheet" href="/sequenceDisplay.css" type="text/css">
 </head>
 
 <body>
 <a href='/index.html'>Go to proposal</a><br>
-<a href='/sequenceDisplayObject.html'>Go to page still under development using Aa.prototype approach</a>
+<a href='/sequenceDisplay.html'>Go to obsolete page not using Aa.prototype approach</a>
 
 <!-- Sequence Entry -->	
 <h2>Basic Protein Sequence Analysis</h2>
@@ -18,7 +18,8 @@
     <li>Click on one of the 20 amino acid residue buttons to count their appearances in your sequence and highlight them.</li>
     <li>The color intensity of the 20 amino acid buttons encodes a value. Only the incidence count depends on your input sequence.</li>
     <li>The four possible encoded values are selected from the radio buttons. I'm working out a method to reveal all the properties stored for each amino acid on either click or hover. Thoughts?</li>
-    <li>Layout change suggestions are welcome. I'm still working on developing a quiz. I'm deliberating whether to switch to more object-oriented Javascript. Stay tuned.</li>
+    <li>Layout change suggestions are welcome. I'm still working on developing a quiz.</li>
+    <li>This version uses AA.prototype and a constructor method for amino acid entities. Still debating whether other classes make sense.</li>
   </ol>
 </div>
 <p><textarea name= "inputSequence" cols="50" id='sequenceInput' class ='sequenceDisplay'></textarea></p>
