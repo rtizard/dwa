@@ -188,6 +188,12 @@ var sequenceCollection = {  // a literal object. Need not be instantiated. Only 
   // Our styled sequence, with 50 char lines, an index lines with dots at 10 aa intervals, and possibly span tags for colorization.
   styledSequence: "",
   
+ //    $('#sequenceInput').blur: function() { //SEQUENCE INPUT LIKELY DETECTED
+//     console.log('data change detected');
+//     sequenceCollection.processInputSequence();	    
+//   }; // END of .blur function FOR SEQUENCE INPUT
+//   ,
+  
   processInputSequence : function(){// called on blur from the sequence input area
     var freshInput = $('#sequenceInput').val();
     this.inputSequence = freshInput;
@@ -208,10 +214,10 @@ var sequenceCollection = {  // a literal object. Need not be instantiated. Only 
     var styledVersion = '';
     var IndexLine = "";
 
-    //Compose a 50-long index line with ticks every 10 residues. Regular spaces collapse, so use &nbsp.
+    //Compose a 50-long index line with ticks every 10 residues. Regular spaces collapse, so use &nbsp;.
     
     for ( var i=0; i<5; i++){
-      IndexLine +="&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp.";
+      IndexLine +="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.";
     }
     IndexLine += '<br>';
     var styledVersion = '';
@@ -220,8 +226,7 @@ var sequenceCollection = {  // a literal object. Need not be instantiated. Only 
     for ( i=0; i<numFullLines; i++){
       styledVersion += IndexLine;
       next50 = this.strippedSequence.substring(i*50,(i+1)*50);
-      styledVersion += next50+"&nbsp&nbsp"+(i+1)*50+'<br>';
-      //styledVersion += next50+"&nbsp&nbsp"+(i+1)*50+'<br><br>';
+      styledVersion += next50+'&nbsp;&nbsp;'+(i+1)*50+'<br>';
     }
     
     if(partialLineLength!=0){
@@ -234,14 +239,14 @@ var sequenceCollection = {  // a literal object. Need not be instantiated. Only 
         if((i+1)%10==0){
           IndexLine += '.';
         } else {
-          IndexLine += '&nbsp';
+          IndexLine += '&nbsp;';
         }
       }
       for(i=partialLineLength; i<50; i++){  //NOW pad out the sequence line so that co-ordinates in right margin line up.
-        next50 += '&nbsp';
+        next50 += '&nbsp;';
       }
       styledVersion += IndexLine+'<br>';
-      styledVersion += next50+"&nbsp&nbsp"+this.strippedSequence.length+'<br><br>';
+      styledVersion += next50+'&nbsp;&nbsp;'+this.strippedSequence.length+'<br><br>';
   
     } //end IF  if(partialLineLength!=0)
     
@@ -252,23 +257,10 @@ var sequenceCollection = {  // a literal object. Need not be instantiated. Only 
       // now that the sequence will be available, allow the browser to set the height of that element
       $('#styledSequence').css({'height':'auto'});
   
-      var messageDatabox ="";
      
-      if (this.strippedSequence!="") {
-        var MW = computeMW(); //using the aa objects, compare with MW to find typos and thinkos    
-        var pIObj = computePiObject();// new with animate objects
-        var extinction = computeExtinctionCoefficient();
-       // determineButtonBckgrnd();
-        messageDatabox = 'Chain length is '+this.strippedSequence.length+'<br>';
-        messageDatabox+='Molecular Weight is '+MW+'<br>';
-        messageDatabox+='Isoelectric point (pI) is '+pIObj+'<br>'; //Add the pI value
-        messageDatabox+='Extinction coefficient is '+extinction+'<br>'; //Add the Extinction coefficient value
-      } else {
-        messageDatabox = 'No valid sequence characters were input. Try again?<br>';
-      }
-      
-      $('#dataBox').html(messageDatabox);
-      $('#styledSequence').html(styledVersion);
+     $('#styledSequence').html(styledVersion);
+     //drive computation in the other object:
+     displayComputedValues.processNewSequence(this.strippedSequence);
       // Finally, paint the background:
       //console.log ('radio button is '+$('input[type=radio]:checked').attr('value'));
       buttonGroup.paintButtonBackground($('input[type=radio]:checked').attr('value'));//paintButtonBackground needs the property from the radio buttons
@@ -290,97 +282,57 @@ var sequenceCollection = {  // a literal object. Need not be instantiated. Only 
 } // END OF literal object sequenceCollection
 
 
-//EXECUTION BEGINS HERE 
-var aaPropertyDisplay = 'count';//need to build a pull-down menu to select this. Or radio buttons, in fact, for starters.
+var displayComputedValues = {// literal object for managing the dataMessageBox
 
-//Create the buttons in code
-buttonGroup.drawGroup(); // using the button group object and the button objects
-
-
-//LISTENERS:
-
-  $('#sequenceInput').blur(function() { //SEQUENCE INPUT LIKELY DETECTED
-    sequenceCollection.processInputSequence();	    
-  }); // END of .blur function FOR SEQUENCE INPUT
-    
-
-	$('.button').live("click",function(){
-	  var buttonClicked = $(this);
-		buttonGroup.clickOne(buttonClicked);
-	});
-
-
-$('input[name=propertyType]').click(function() {
-	//the 'global' variable to match radio button selected.
-	  aaPropertyDisplay = $(this).attr('value');
-		buttonGroup.paintButtonBackground(aaPropertyDisplay); // make the changes to background of buttons
-		
-});
-
-	// $('.button').live("mouseenter",function(){
-// 	 console.log("mouseenter detected"); 
-//   });
-//   
-// 	$('.button').live("mouseleave",function(){
-// 	 console.log("mouseleave detected"); 
-//   });
+  MW : '',
+  pI : '',
+  extinction : '',
+  messageDatabox : '',
   
-  
+  processNewSequence : function(strippedSequence){
+         MW = this.computeMW(); //using the aa objects    
+         pI = this.computePi();// new with animate objects
+         extinction = this.computeExtinctionCoefficient();
+         messageDatabox ="";
 
-//using Aa.prototype derived objects
-function computeExtinctionCoefficient() {
+      if (strippedSequence!="") {
+        messageDatabox = 'Chain length is '+strippedSequence.length+'<br>';
+        messageDatabox+='Molecular Weight is '+MW+'<br>';
+        messageDatabox+='Isoelectric point (pI) is '+pI+'<br>'; //Add the pI value
+        messageDatabox+='Extinction coefficient is '+extinction+'<br>'; //Add the Extinction coefficient value
+      } else {
+        messageDatabox = 'No valid sequence characters were input. Try again?<br>';
+      }
+     $('#dataBox').html(messageDatabox);
+          
+  }, // end of processNewSequence
+              
+  //using Aa.prototype derived objects
+ computeExtinctionCoefficient : function() {
   var key;
 	var extinctionCoefficient = 0;
 	for (key in aa_array) {
     extinctionCoefficient += aa_array[key].getExtinctionContribution();
-//     console.log("extinctionCoefficient partial is "+extinctionCoefficient);
 	} // end For
  
-return (Math.round(extinctionCoefficient*1000))/1000;//round off to 3 places to the right of the decimal
+  return (Math.round(extinctionCoefficient*1000))/1000;//round off to 3 places to the right of the decimal
 
-} //End of computeExtinctionCoefficient()
+  }, //End of computeExtinctionCoefficient()
 
 
-//NEW METHOD, now using the objects inheriting from Aa.prototype
-function computeMW() {
+ computeMW : function() {
   var key;
   var molecularWeight = 0;
 
 	for (key in aa_array) {
     aa_array[key].setCount();
     molecularWeight += aa_array[key].getMwContribution();
-//     console.log("molecularWeight partial is "+molecularWeight);
 	} // end For
  
   return (Math.round(molecularWeight*1000))/1000;//round off to 3 places to the right of the decimal
-} //END OF computeMW
+}, //END OF computeMW
 
-
-
-function newCalcChargeAtpH(current_pH) {
-  //# it's the sum of all the partial charges for the
-  //# termini and all of the charged aa's, use the remnant of the aminoAcid_pK array for N and C terminus values, otherwise: ACDE... objects.
- var charge = partialCharge(aminoAcid_pK['Nterminus'], current_pH )//This is a positive contributor, one N terminus/molecule
- 	- partialCharge(current_pH,aminoAcid_pK['Cterminus'] )	//negative, one C terminus/molecule
-  	+ K.count * partialCharge(K.pK,current_pH)// positive, charge for single residue times the residue count
-    + R.count * partialCharge(R.pK,current_pH)// positive
-    + H.count * partialCharge(H.pK,current_pH)// positive
-    - D.count * partialCharge(current_pH,D.pK)//negative
-    - E.count * partialCharge(current_pH,E.pK)//negative
-    - C.count * partialCharge(current_pH,C.pK)//negative
-    - Y.count * partialCharge(current_pH,Y.pK); //negative
-    return (charge);
-} // end of function newCalcChargeAtpH which is obsolete despite its name
-
-function partialCharge (p1,p2){
-	// Concentration Ratio is 10**(pK-pH)for positive groups
-  // and 10**(pH-pK)for negative groups. THE CORRECT ORDER OF p1 and p2 are supplied by calcChargeAtpH
-	var concentrationRatio=Math.pow(10,p1-p2);
-	return concentrationRatio/(concentrationRatio+1);
-} // END OF FUNCTION partialCharge
-
-
-function computePiObject() {
+ computePi: function() {
 	// Start at pH 7. Determine charge, contributed by N and C termini and charged amino acid side chains (performed by calcChargeAtpH).
 	// Adjust pH upward or downward by currentStep and recompute the charge. Step in the correct direction again, this
 	// time stepping 1/2 as far.
@@ -393,10 +345,8 @@ function computePiObject() {
 	var crntCharge=1;  //something different from lastCharge to force once through the while loop
 
 	while (lastCharge!=crntCharge) {
-// 		console.log("pH="+current_pH+"  crntCharge="+crntCharge); // this is amusing to review in the console
 		lastCharge=crntCharge;
-		crntCharge=calcChargeAtpHObject(current_pH); //depends on Aa.prototype derived objects
-		//crntCharge=newCalcChargeAtpH(current_pH); //uses objects for properties only, but will run
+		crntCharge=this.calcChargeAtpH(current_pH); //depends on Aa.prototype derived objects
     crntCharge=(Math.round(crntCharge*1000))/1000; //round off to 3 places to the right of the decimal
 		
 		if (crntCharge>0){
@@ -410,21 +360,252 @@ function computePiObject() {
 	
 	return((Math.round(1000*current_pH))/1000);//rounded to 3 places after the decimal point
 	
+  }, // END OF FUNCTION computePi
 
-} // END OF FUNCTION computePi
+
+ calcChargeAtpH: function(current_pH) {
+    //note that all values returned from objects are added together. Negative values are handled by the aa object.
+    var charge = 0;
+    for(key in charged_array) { //charged_array is global. Its composition: var charged_array = [Nterm,Cterm,K,R,H,D,E,C,Y];
+    
+    charge += charged_array[key].getChargeAtpH(current_pH);
+  }
+
+  return charge;
+
+} // end of calcChargeAtpH(current_pH)
+
+} //END OF literal object displayComputedValues
 
 
-function calcChargeAtpHObject(current_pH) {
-//note that all values returned from objects are added together. Negative values are handled by the aa object.
-var charge = 0;
-for(key in charged_array) { //charged_array is global. Its composition: var charged_array = [Nterm,Cterm,K,R,H,D,E,C,Y];
+//QUIZ CONSTRUCTOR
+function Quiz(quiz_id,category1,category2) { 
+     // alert(arguments.callee.name); returns Quiz
 
-charge += charged_array[key].getChargeAtpH(current_pH);
+  this.correctCount = 0;
+  this.incorrectCount = 0;
+  this.scoreboard = '';
+  this.leftChoice = null; // null signifies no choice made in the column, else it will be the object clicked upon
+  this.rightChoice = null; // ditto
+  this.id = quiz_id;
+//   console.log ('id at time of quiz1 creation is '+this.id);
+  // Build the parallel arrays of data. column1 and column2 will become non-parallel shortly. Reference arrays will remain unshuffled.
+   this.referenceColumn1 = [];
+   this.referenceColumn2 = [];
+   this.column1 = [];
+   this.column2 = [];
+  
+  for (key in aa_array){
+    this.referenceColumn1.push(aa_array[key][category1]);
+    this.referenceColumn2.push(aa_array[key][category2]);
+    this.column1.push(aa_array[key][category1]);
+    this.column2.push(aa_array[key][category2]);
+  }
+  
+  //Shuffle the display arrays with function shuffle(obj) provided by Susan.
+  shuffle(this.column1);
+  shuffle(this.column2);
+  var html = $('#quizArea').html();
+  html += '<div class="quizBox" id='+this.id+'Box><table class="quizTable">';
+  for (var i =0; i<20;i++){
+    html+='<tr><td class="left ' +quiz_id+'">'+this.column1[i]+'</td><td class="right ' +quiz_id+'">'+this.column2[i]+'</td><tr>';
+  }
+  html+='</table><div class=scoreboard></div></div>';//terminating table, adding scoreboard, and terminating quizBox div
+  
+  $('#quizArea').html(html);
+
+	/*-------------------------------------------------------------------------------------------------
+	From: http://dzone.com/snippets/array-shuffle-javascript
+	-------------------------------------------------------------------------------------------------*/
+
+	 function shuffle(obj){ 
+    	for(var j, x, i = obj.length; i; j = parseInt(Math.random() * i), x = obj[--i], obj[i] = obj[j], obj[j] = x);
+    	return obj;
+    }
+
+} // end of Quiz constructor
+
+// QUIZ PROTOTYPE
+Quiz.prototype = {
+
+
+
+  getClickfromListener : function(objectClicked){
+    var i;
+    console.log ('within quiz content= '+objectClicked.html());
+    
+    if (objectClicked.html()!=''){ // disregard already matched and erased items
+    
+    //console.log ('within quiz class= '+objectClicked.attr('class'));
+    console.log ('callee is '+arguments.callee.name); // returns ""
+  // alert(arguments.callee.name); //returns nothing?
+    console.log ('quiz id element from getClickFromListener is '+this.id);
+    console.log ('class is '+objectClicked.attr('class'));
+    var className = objectClicked.attr('class');
+    var classArray = className.split(/ /);
+    console.log ('classname element 0 followed by element 1: '+classArray[0]+ ' '+classArray[1]); // e.g. 0:right 1:quiz4
+    
+    if (classArray[0]=='left'){  //left column click
+      //new try from scratch, assuming findSuccessOrFailure is available
+       if (this.leftChoice == null) {
+        this.leftChoice = objectClicked;
+        objectClicked.css('backgroundColor','pink');// turn it pink while we think further!
+        //this.findSuccessOrFailure();//we'll let findSuccessOrFailure do the rest
+        
+        
+      } else { // there already is a left column button clicked. By defn, no right color button to compare to. 
+        this.leftChoice.css('backgroundColor','white');// 
+        this.leftChoice = objectClicked;
+      }
+    } else { //right column click
+      if (this.rightChoice == null) {
+        this.rightChoice = objectClicked;
+        objectClicked.css('backgroundColor','pink');// turn it pink while we think further!
+        //this.findSuccessOrFailure();//we'll let findSuccessOrFailure do the rest
+        
+        
+      } else { // there already is a right column button clicked. By defn, no left color button to compare to. 
+        this.rightChoice.css('backgroundColor','white');// 
+        this.rightChoice = objectClicked;
+      }
+        
+    } 
+       crnt = this; // note that this refers to the window object in the next statement. This is clunky but seems to work.
+       setTimeout(function() { crnt.findSuccessOrFailure(); },500);
+      // modeled on  setTimeout(function() { writeNumber.html("1"); },1000);
+
+     // setTimeout(crnt.findSuccessOrFailure(),1000); //wait one second to allow the pink click to register with user
+    } // end if html not blank in clicked
+
+  }, // end of getClickfromListener
+  
+  findSuccessOrFailure : function(){
+   //  console.log('this.leftChoice.html() is '+this.leftChoice.html());
+//     console.log('this.rightChoice.html() is '+this.rightChoice.html());
+
+    if ((this.leftChoice != null) && (this.rightChoice != null)) { // we have both left and right column choices. Do they match?
+//       console.log ('this.leftChoice.html is '+ this.leftChoice.html());
+      for ( i=0; i<20; i++){
+//         console.log ('this.referenceColumn1[i] is '+ this.referenceColumn1[i]);
+        if (this.referenceColumn1[i]==this.leftChoice.html()){
+          var indexFound = i;
+//           console.log ('index found at '+i);
+        }
+      }
+//       console.log ('indexFound and this.referenceColumn2[indexFound] and this.rightChoice.html() are '+indexFound+' '+this.referenceColumn2[indexFound]+' '+this.rightChoice.html());
+      if (this.referenceColumn2[indexFound]==this.rightChoice.html()){
+        //alert ('success');
+        //add metrics here
+        this.leftChoice.html('');
+        this.rightChoice.html('');
+        this.leftChoice.css('backgroundColor','gray');
+        this.rightChoice.css('backgroundColor','gray');
+        this.leftChoice = null;
+        this.rightChoice = null;
+        this.correctCount++;
+        this.scoreboard = 'Correct Answer!<br>';
+        
+      } else {
+        //alert ('failure');
+        this.incorrectCount++;
+        this.leftChoice.css('backgroundColor','white');
+        this.rightChoice.css('backgroundColor','white');
+        this.leftChoice = null;
+        this.rightChoice = null;
+        this.scoreboard = 'Sorry, that is incorrect.<br>';
+        
+}
+      
+      this.scoreboard += 'Correct: '+this.correctCount+'<br>';
+      this.scoreboard += 'Incorrect: '+this.incorrectCount+'<br>';
+      console.log('this.id is ' +this.id);
+      $('#'+this.id+'Box .scoreboard').html(this.scoreboard);
+    } // end check for both choices non-null
+     
+        
+        
+        
+  } // end of findSuccessOrFailure
+  
+}; // END of Quiz.prototype
+
+var quiz1;
+var quiz2;
+var quiz3;
+var quiz4;
+var crnt;
+
+var Quizmanager ={
+
+   potentialQuiz : {
+    'quiz1' : quiz1,
+    'quiz2' : quiz2,
+    'quiz3' : quiz3,
+    'quiz4' : quiz4,
+  },
+
+createQuiz : function(){ //set up a particular four quizzes at once. Broaden this to respect choice of user?
+// console.log ('inside Quizmanager.createQuiz');
+Quizmanager.potentialQuiz['quiz1'] = new Quiz('quiz1','oneLetter','threeLetter');//a simple test
+Quizmanager.potentialQuiz['quiz2'] = new Quiz('quiz2','oneLetter','name');//a simple test
+Quizmanager.potentialQuiz['quiz3'] = new Quiz('quiz3','threeLetter','name');//a simple test
+Quizmanager.potentialQuiz['quiz4'] = new Quiz('quiz4','oneLetter','pK');//a simple test
+console.log ('value of id inside quiz1 from outside is '+Quizmanager.potentialQuiz['quiz1'].id)
+// quiz1 = new Quiz('quiz1','oneLetter','threeLetter');//a simple test
+// quiz2 = new Quiz('quiz2','oneLetter','name');//a simple test
+// quiz3 = new Quiz('quiz3','threeLetter','name');//a simple test
+// quiz4 = new Quiz('quiz4','oneLetter','pK');//a simple test
 }
 
-return charge;
+} // end of literal object Quizmanager
 
-} // end of calcChargeAtpHObject(current_pH)
+ //EXECUTION BEGINS HERE 
 
+//Create the buttons in code
+buttonGroup.drawGroup(); // using the button group object
+
+
+//that's basically it. Now we listen.
+
+  //LISTENERS:
+  
+  //        sequence input detected
+  $('#sequenceInput').blur(function() {sequenceCollection.processInputSequence(); }); 
+  
+  //       one of the AA buttons was clicked
+  $('.button').live("click",function(){var buttonClicked = $(this);buttonGroup.clickOne(buttonClicked);});
+  
+  //        radio button click detected, selecting a new aa property to display
+  $('input[name=propertyType]').click(function() {aaPropertyDisplay = $(this).attr('value');
+    buttonGroup.paintButtonBackground(aaPropertyDisplay); // make the changes to background of buttons
+  });
+
+  $('#createQuiz').click(function(){
+//  quiz1 = new Quiz('quiz1','oneLetter','threeLetter');//a simple test
+//   quiz2 = new Quiz('quiz2','oneLetter','name');//a simple test
+    Quizmanager.createQuiz();
+  });
+  
+  $('td').live("click", function(){
+  // console.log('content in listener is '+$(this).html());
+//   console.log ('class in listeneris '+$(this).attr('class'));
+  // from the class, figure out which quiz object to address this click to:
+  var className = $(this).attr('class'); // something like 'right quiz4'
+  var classArray = className.split(/ /);
+//   console.log ('classname in listener element 0 followed by element 1: '+classArray[0]+ ' '+classArray[1]); // e.g. 0:right 1:quiz4
+  Quizmanager.potentialQuiz[classArray[1]].getClickfromListener($(this));
+  });
+  
+  
+  
+	// $('.button').live("mouseenter",function(){
+// 	 console.log("mouseenter detected"); 
+//   });
+//   
+// 	$('.button').live("mouseleave",function(){
+// 	 console.log("mouseleave detected"); 
+//   });
+  
+  
 }); // END document.ready
 
