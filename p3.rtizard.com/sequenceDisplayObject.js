@@ -406,12 +406,19 @@ function Quiz(quiz_id,category1,category2) {
   shuffle(this.column1);
   shuffle(this.column2);
   var html = $('#quizArea').html();
-  html += '<div class="quizBox" id='+this.id+'Box><table class="quizTable">';
+  this.scoreboard = 'Sorry, that is incorrect.<br>';
+        
+      
+      this.scoreboard += '<br>Correct: '+this.correctCount+'<br>';
+      this.scoreboard += 'Incorrect: '+this.incorrectCount+'<br>';
+    
+  html += '<div class="quizBox" id='+this.id+'Box><div class=scoreboard><br>Correct:0<br>Incorrect:0</div><table class="quizTable">';
   for (var i =0; i<20;i++){
     html+='<tr><td class="left ' +quiz_id+'">'+this.column1[i]+'</td><td class="right ' +quiz_id+'">'+this.column2[i]+'</td><tr>';
   }
-  html+='</table><div class=scoreboard></div></div>';//terminating table, adding scoreboard, and terminating quizBox div
-  
+  html+='</table></div>';//terminating table, adding scoreboard, and terminating quizBox div
+//   html+='</table><div class=scoreboard></div></div>';//terminating table, adding scoreboard, and terminating quizBox div
+
   $('#quizArea').html(html);
 
 	/*-------------------------------------------------------------------------------------------------
@@ -470,8 +477,9 @@ Quiz.prototype = {
       }
         
     } 
-       crnt = this; // note that this refers to the window object in the next statement. This is clunky but seems to work.
-       setTimeout(function() { crnt.findSuccessOrFailure(); },500);
+//       $('#'+this.id+'Box .scoreboard').html(''); clear the scoreboard THROWS AN ERROR, WHY?
+      crnt = this; // note that this refers to the window object in the next statement. This is clunky but seems to work.
+      setTimeout(function() { crnt.findSuccessOrFailure(); },250);
       // modeled on  setTimeout(function() { writeNumber.html("1"); },1000);
 
      // setTimeout(crnt.findSuccessOrFailure(),1000); //wait one second to allow the pink click to register with user
@@ -503,7 +511,7 @@ Quiz.prototype = {
         this.leftChoice = null;
         this.rightChoice = null;
         this.correctCount++;
-        this.scoreboard = 'Correct Answer!<br>';
+        this.scoreboard = '<span class="good">Correct Answer!</span><br>';
         
       } else {
         //alert ('failure');
@@ -512,7 +520,7 @@ Quiz.prototype = {
         this.rightChoice.css('backgroundColor','white');
         this.leftChoice = null;
         this.rightChoice = null;
-        this.scoreboard = 'Sorry, that is incorrect.<br>';
+        this.scoreboard = '<span class="bad">Sorry, that is incorrect.</span><br>';
         
 }
       
