@@ -25,6 +25,9 @@ width: 500px;
 width: 500px;
 }
 
+#demoSequence{
+background-color: pink;
+}
 
 #sequenceDisplay {
 position: absolute;
@@ -80,38 +83,35 @@ margin-top:15px;
 }
 
 #quizArea {
-/* border: 1px solid gray;*/
+/*border: 1px solid gray;*/
 margin-top:15px;
+width: 1230px;
 }
 
-table {
-cursor:pointer;
-border: 1px solid gray;
-width: 100px;
-float: left;
-margin:20px;
-}
-
-.column2 {
-float: right;
-}
 .quizBox {
 border: 1px solid gray;
 width: 300px;
 float: left;
 }
 
-/*.scoreboard {
-position: relative;
-top: 100px;
-left: 10px;
-margin-left:40;
+table {
+cursor:pointer;
+border: 1px solid gray;
+width: 180px;
+float: left;
+margin-left:40px;
+padding:10px;
 }
-*/
+
+.column2 {
+float: right;
+}
+
 
 .scoreboard {
 height:40px;
-padding: 10px;
+padding: 20px;
+margin-left: 60px;
 }
 
 .good {
@@ -121,19 +121,27 @@ color:green;
 .bad {
 color:red;
 }
+
 .quizButton {
 border: 1px solid gray;
 width: 20px;
 height: 20px;
 padding: 5px;
 }
+
+#quizHead{
+text-align:center;
+}
 td {
 cursor:pointer;
-width: 30px;
+width: 80px;
 border: 1px solid gray;
 text-align: center;
 height: 18px;
+margin: 5px;
+padding: 2px;
 }
 .left {}
 
 .right{}
+
