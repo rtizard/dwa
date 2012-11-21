@@ -569,8 +569,9 @@ buttonGroup.drawGroup(); // using the button group object
 // $( "#residueButtons" ).tooltip({ content: "Awesome title!" });
 
 // $(function() {
-    $("#sequenceInput").tooltip();
-    
+  $("#sequenceInput").tooltip();
+   $('#visibilityToggle').hide();
+ 
 //     $('#sequenceInput').live
 // });
 
@@ -587,14 +588,45 @@ buttonGroup.drawGroup(); // using the button group object
   
   //       one of the AA buttons was clicked
   $('.button').live("click",function(){var buttonClicked = $(this);buttonGroup.clickOne(buttonClicked);});
+  //  $('.button').live("hover",function(){tooltip}); BAD Syntax
   
+// http://stackoverflow.com/questions/12945764/how-do-you-rebind-jqueryui-tooltip
+//   $(document).on({
+//     hover: function () {
+//         $(this).find('.tooltip').show();
+//         $(this).find('.tooltip').position({ at: 'bottom center', of: $(this), my: 'top' });
+//     },
+//     mouseleave: function () {
+//             $('.tooltip').hide();
+//     }
+    
+// },'.sourceItem');
+
   //        radio button click detected, selecting a new aa property to display
   $('input[name=propertyType]').click(function() {aaPropertyDisplay = $(this).attr('value');
     buttonGroup.paintButtonBackground(aaPropertyDisplay); // make the changes to background of buttons
   });
   //        the user asked for the default quiz set to be created. Make the quiz set and hide the button
-  $('#createQuiz').click(function(){ Quizmanager.createQuiz(); $('#createQuiz').hide(); });
+  $('#createQuiz').click(function(){ Quizmanager.createQuiz(); 
+  $('#createQuiz').hide(); 
+  $('#styledSequence').hide(); 
+$('#visibilityToggle').show();
+  });
   
+ $('#visibilityToggle').click(function(){
+ console.log('quiz vis is '+$('#quizArea').css('display'));
+ 
+  if($('#quizArea').css('display')=='block'){
+  $('#quizArea').hide();
+    $('#sequenceDisplay').show();
+
+  } else {
+  $('#quizArea').show();
+  $('#sequenceDisplay').hide();
+  }
+  
+   });
+
   //        the user selected a value from one of the quizzes. Give it to the correct quiz
   $('td').live("click", function(){
   var className = $(this).attr('class'); // something like 'right quiz4'

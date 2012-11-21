@@ -34,18 +34,14 @@
 </div>
 <p><textarea name= 'inputSequence' title='Please paste your sequence here' cols='50' id='sequenceInput' class ='sequenceDisplay'></textarea></p>
 <div class='error' id='sequenceError'></div>
-<div id='dataBox'>
-</div>
-<!-- Don't need this submit button currently
-<p><input type="submit" id="computePi" value = "compute pI" /></p>
--->
+<div id='dataBox'></div>
 <div id='plainSequence' class ='sequenceDisplay'>
 </div>
 
 <div id='sequenceDisplay'>
     <div id='comment'>
   </div>
-  <div id='styledSequence' class ='sequenceDisplay'>
+  <div id='styledSequence' class ='sequenceDisplay alternateVisibility'>
   </div>
 </div>
 
@@ -61,7 +57,8 @@
 </div>
 
 <div id='createQuiz'>Click to create a panel of 4 quizzes!</div>
-<div id='quizArea'></div>
+<div id='visibilityToggle'>Click to hide the quiz and reveal the sequence</div>
+<div id='quizArea' class='alternateVisibility'></div>
 
 </body>
 </html>
