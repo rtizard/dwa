@@ -1,0 +1,26 @@
+<!Doctype HTML>
+
+<head>
+<link href="styleProposal.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>P3 for Richard Tizard: In Page Biochemistry Tools</h1>
+
+<p>Currently many, many biochemistry and molecular biology web sites will perform routine calculations for you but most run on the server side. I propose to try two or more of these in a web page solely in Javascript. It is certainly possible that modern browsers running on modern hardware may be capable of adequate performance of some of these.</p>
+
+<p>I'll flesh this out more in the near future, but two possible functions spring to mind.</p>
+
+<p>1) <a href="http://www.isoelectric.ovh.org">www.isoelectric.ovh.org</a> estimates the isoelectric point for a protein given a submitted peptide sequence. Input is text and output is a float. No graphical razzle dazzle. It runs this in PHP on the server. I propose doing this in Javascript right in the page. It will be an interesting test of the speed of this approach, since accepted methods involve looping through the amino acid sequence many times.</p>
+
+<p>2) Mimicking <a href="http://web.expasy.org/translate/">web.expasy.org/translate</a> would be computationally much easier. This function would accept a DNA sequence and output the protein sequence it encodes. One pass through looking up the triplets in a codon usage table. Input would be text and output also text. No graphics again, unless it were useful to highlight, say, one or more amino acids (say, all <span class="ColorMe">C</span>ysteines) by <span class="ColorMe">C</span>oloring them.</p>
+
+<p>The interactions are admittedly minimal as outlined here. In each case a single input yields a single output. I will try to think of ways to augment this to exploit the interactivity of JS.</p>
+
+<a href='/sequenceDisplayObject.html'>Go to basic protein analysis page</a><br>
+
+</body>
+
+</HTML>
+

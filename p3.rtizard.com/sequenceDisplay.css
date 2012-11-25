@@ -3,6 +3,13 @@ font-family: Arial;
 
 }
 
+h2 {
+width:1150px;
+text-align: center;
+}
+
+
+
 .sequenceDisplay {
 font-family: Courier;
 width: 500px;
@@ -96,6 +103,7 @@ margin-top:15px;
 }
 
 #visibilityToggle { //will be hidden in code, then revealed when quizzes are drawn
+/* but it will only be drawn if sequence height >=400px */
 background-color: pink;
 border-radius: 6px;
 border: 1px solid gray;
