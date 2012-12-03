@@ -661,6 +661,7 @@ createQuiz : function(){ //set up a particular four quizzes at once. Broaden thi
   this.handleToggleAppearance();
  }
 
+  //One future task could be to add a 'take another one' for each quiz to reshuffle and play again.
 } // end of literal object Quizmanager
 
 //CREATE THE BUTTONS IN CODE
