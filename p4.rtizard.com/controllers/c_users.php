@@ -14,7 +14,7 @@ class users_controller extends base_controller {
 	if(!$this->user) {
 		Router::redirect('/users/signupOrLogin/');
 		} else {
-		Router::redirect('/posts/index/');
+		Router::redirect('/requests/index/');
 		}
 	}
 		
@@ -59,14 +59,14 @@ class users_controller extends base_controller {
 				# Insert this user into the database 
 				$user_id = DB::instance(DB_NAME)->insert("users", $_POST);
 				
-				# A new user is defined to follow self -- add to users_users table
+				# NOT TRUE IN P4, COMMENT OUT FOR NOW --A new user is defined to follow self -- add to users_users table
 				
-				$data = Array("created" => $_POST['created'],
-							"user_id" => $user_id,
-							"user_id_followed" => $user_id,
-							);
-				$dummyvariable = DB::instance(DB_NAME)->insert("users_users", $data);
-				
+			// 	$data = Array("created" => $_POST['created'],
+// 							"user_id" => $user_id,
+// 							"user_id_followed" => $user_id,
+// 							);
+// 				$dummyvariable = DB::instance(DB_NAME)->insert("users_users", $data);
+// 				
 				# ACTION REQUIRED: CONTINUE WITH AUTOLOGIN AT SUCCESSFUL signup
 				# easier alternative: redirect to login only page with a welcoming message!
 				#even easier, but UGLY, right back to this page without further ado.
@@ -148,7 +148,7 @@ public function signupOrLogin($error = NULL) {
 
 	
 	# set the title
-		$this->template->title   = "Signup, or Login for Returning Blipsters";
+		$this->template->title   = "Signup, or Login for Returning Users";
 
 	# Render template
 		echo $this->template;
@@ -174,7 +174,7 @@ public function signupOrLogin($error = NULL) {
 						
 		if(!$token) {
 			#login failed--go directly to local version of redirect method for troubleshooting and error reporting
-			$this->login_redirectNonCore($token, $_POST['email'], "/posts/index/");
+			$this->login_redirectNonCore($token, $_POST['email'], "/requests/index/");
 
 		
 			} else {
@@ -193,7 +193,7 @@ public function signupOrLogin($error = NULL) {
 			$data = Array("numLogins" => $numLogins);
 			DB::instance(DB_NAME)->update("users", $data, "WHERE token = '".$token."'");
    			#now use the local version of redirect method, somewhat unnecessarily!
-			$this->login_redirectNonCore($token, $_POST['email'], "/posts/index/");
+			$this->login_redirectNonCore($token, $_POST['email'], "/requests/index/");
 			}
 					
 } # end of p_login()
@@ -259,11 +259,11 @@ public function profile() {
     $this->template->content = View::instance('v_users_profile');
     $this->template->title   = "Profile of ".$this->user->first_name;
     
-    $this->menuArray = Array
-			("Change who you're following" => "/posts/users/", 
-			"View and Add Posts" => "/posts/", 
-			"Logout" => "/users/logout/",);
-	$this->template->content->menuArray = $this->menuArray;
+//     $this->menuArray = Array
+// 			("Change who you're following" => "/posts/users/", 
+// 			"View and Add Posts" => "/posts/", 
+// 			"Logout" => "/users/logout/",);
+// 	$this->template->content->menuArray = $this->menuArray;
 	
 	# now the SQL-requiring values. First # of posts by the user. NOTE: COULDN'T GET COUNT SYNTAX RIGHT.
 	#$q = "SELECT user_id
