@@ -10,39 +10,56 @@ $(document).ready(function() {
       console.log ('in setCurrentWhere value for option is '+option);
     },
     
-    sortObj : {request_id : 1, clientLastName: 0, constructName:0, requestDate:0, programName:0, sponsor: 0},
+    sortObj : {request_id : 1, last_name: 0, constructName:0, date:0, program:0, projectSponsor: 0},
     
     setSortValue: function(option){
       console.log ('in setSortValue value for option is '+option);
       
-      if(option=='request_id'){
-        switch(this.sortObj.request_id){
+        switch(this.sortObj[option]){
           case(0):
-            console.log('this.sortObj.request_id is 0');
-            this.sortObj.request_id = 1;
+            console.log(this.sortObj[option]+' is 0');
+            newValue = 1;
+            this.zeroAllSortValues();
+            this.sortObj[option] = newValue;
             break;
           case(1):
-            console.log('this.sortObj.request_id is 1');
-            this.sortObj.request_id = 2;
+            console.log(this.sortObj[option]+' is 1');
+            newValue = 2;
+            this.zeroAllSortValues();
+            this.sortObj[option] = newValue;
             break;
           case(2):
-            console.log('this.sortObj.request_id is 2');
-            this.sortObj.request_id = 1;
+            console.log(this.sortObj[option]+' is 2');
+
+            newValue = 1;
+            this.zeroAllSortValues();
+            this.sortObj[option] = newValue;
             break;
-        }
+        }//end Switch
+        
+      }, //END OF setSortValue FUNCTION
+    
+    zeroAllSortValues: function(){
+      for (i in this.sortObj){
+        console.log(i+' is '+this.sortObj[i]);
+        this.sortObj[i] = 0;
       }
     },
     
     returnSortCondition: function(){
-        var returnArray =[];
+      var returnArray =[];
+        
+      for (i in this.sortObj){
+        if(this.sortObj[i]!=0){
+          returnArray['field']=i;
+          returnArray['directionCode']=this.sortObj[i];        
+        }//end if
 
-      if(this.sortObj.request_id!=0){
-        returnArray['field']='request_id';
-        returnArray['directionCode']=this.sortObj.request_id;
-      } else { // we'll sort on request_id ascending by default!
-        returnArray['field']='request_id';
-        returnArray['directionCode']=1;//hard coded value by default (if none have sort order set)
+       //  console.log(i+' is '+this.sortObj[i]);
+//         this.sortObj[i] = 0;
       }
+
+      console.log('next line is the returnArray from return Sort condition')
       console.log(returnArray);
       return returnArray;
     },
@@ -67,6 +84,21 @@ $(document).ready(function() {
         data: {queryWhere: queryWhere, sortField: sortIndicator['field'], sortDirection: sortIndicator['directionCode']},
         success: function(response) {
 //                  console.log(response);
+//                            var tableText = '<table>';
+//           tableText +='<tr>';
+//           tableText +='<th class="headerSort" id="request_id" class="fixedWidth_column">request_id</th>';
+//           tableText +='<th class="headerSort" id="last_name" class="fixedWidth_column">Client</th>';
+//           tableText +='<th class="headerSort" id="constructName" class="fixedWidth_column">Construct Name</th>';
+//           tableText +='<th class="headerSort" id="date" class="fixedWidth_column">Request Date</th>';
+//           tableText +='<th class="headerSort" id="program" class="fixedWidth_column">Program Name</th>';
+//           tableText +='<th class="headerSort" id="projectSponsor" class="fixedWidth_column">Sponsor</th>';
+//           tableText +='</tr>';
+//           tableText +='</table>';
+// 
+// //          SEND THE TABLE INTO THE DIV
+// 
+//           $('#requestList').html(tableText);
+// 
 //                  return; //temporary to examine the response value directly
                  
           responseObject = jQuery.parseJSON(response); //temporarily disabled
@@ -79,12 +111,12 @@ $(document).ready(function() {
 
           var tableText = '<table>';
           tableText +='<tr>';
-          tableText +='<th class="fixedWidth_column">request_id</th>';
-          tableText +='<th class="fixedWidth_column">Client</th>';
-          tableText +='<th class="fixedWidth_column">Construct Name</th>';
-          tableText +='<th class="fixedWidth_column">Request Date</th>';
-          tableText +='<th class="fixedWidth_column">Program Name</th>';
-          tableText +='<th class="fixedWidth_column">Sponsor</th>';
+          tableText +='<th class="headerSort" id="request_id" class="fixedWidth_column">request_id</th>';
+          tableText +='<th class="headerSort" id="last_name" class="fixedWidth_column">Client</th>';
+          tableText +='<th class="headerSort" id="constructName" class="fixedWidth_column">Construct Name</th>';
+          tableText +='<th class="headerSort" id="date" class="fixedWidth_column">Request Date</th>';
+          tableText +='<th class="headerSort" id="program" class="fixedWidth_column">Program Name</th>';
+          tableText +='<th class="headerSort" id="projectSponsor" class="fixedWidth_column">Sponsor</th>';
           tableText +='</tr>';
 
           var i=0;
@@ -188,10 +220,19 @@ $(document).ready(function() {
   
   
     $('#tempSort').click(function() {
-    requestListManager.setSortValue('request_id');
-requestListManager.refreshTable();
+   console.log ('calling zeroAllSortValues from the button');
+   requestListManager.zeroAllSortValues(); 
+   
+//     requestListManager.setSortValue('request_id');
+// requestListManager.refreshTable();
     });
   
-  
+    $('.headerSort').live("click",function() {
+      sortField = $(this).attr('id');
+      requestListManager.setSortValue(sortField);
+      requestListManager.refreshTable();
+
+    });
+
 }); //end doc ready
 
