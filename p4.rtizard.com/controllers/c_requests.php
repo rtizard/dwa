@@ -18,27 +18,61 @@ class requests_controller extends base_controller {
 
   public function index() {
   // query for all requests (simple example at the moment)
-  $q = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
-  FROM requests r
-  INNER JOIN users u
-  on u.user_id = r.client_id;';
- // where r.client_id ='. $this->user->user_id.';';
-
-  # Run our query, store the results in the array $requests
-  $requests = DB::instance(DB_NAME)->select_rows($q);
+  // $q = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
+//   FROM requests r
+//   INNER JOIN users u
+//   on u.user_id = r.client_id;';
+//  // where r.client_id ='. $this->user->user_id.';';
+// 
+//   # Run our query, store the results in the array $requests
+//   $requests = DB::instance(DB_NAME)->select_rows($q);
   //    echo Debug::dump($requests,"Contents of requests array");
   //       # Setup view
-  $this->template->content = View::instance('v_requests_index_complete');
+  $this->template->content = View::instance('v_requests_index_stripped');
   $this->template->title   = "Requests";
 
   //      //  # Pass data to the view
-  $this->template->content->requests = $requests;
+//   $this->template->content->requests = $requests;
 
   //      # Render template
   echo $this->template;
   } // end of function index()
 
-   public function p_fill_request_table($option) {
+  public function p_fill_request_table2() {// AJAX reply. For now gives all or mine only requests back via JSON for display in the upper table
+    //     echo 'my response button click';
+    //     echo 'Option is '.$option;
+  //   echo $option;
+//     return;
+   $baseQuery = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
+      FROM requests r
+      INNER JOIN users u
+      ON u.user_id = r.client_id';
+    if($_POST['queryWhere']=='all'){ // still very basic set of query options: all or mine only
+    $q = $baseQuery;
+    } else { // only one other alternative at this point to 'all' for $option switch
+      $q = $baseQuery.' where r.client_id ='. $this->user->user_id;
+    }
+    
+    $q.= ' ORDER BY '.$_POST['sortField'];
+    
+    if($_POST['sortDirection']==2){
+      $q.= ' DESC';
+    }
+    
+    $q.= ';';//close the command, we're done!
+    $toJavascriptConsole = '$q is '.$q;
+//   echo $toJavascriptConsole;
+//   return;
+//     $debugResponse = '$q is '.
+     // Javascript:   data: {queryWhere: queryWhere, sortField: sortIndicator['field'], sortDirection: sortIndicator['directionCode']},
+
+    $requests = DB::instance(DB_NAME)->select_rows($q);
+    //    echo Debug::dump($requests,"Contents of requests array");
+    $requestObject = json_encode($requests);
+    echo $requestObject;
+  } // end of function p_fill_request_table2()
+
+   public function p_fill_request_table($option) {//old style that injects directly into the page
 //     echo 'my response button click';
 //     echo 'Option is '.$option;
  # Set up view...

@@ -27,3 +27,4 @@ ID of current user is <?=$user->user_id;?>.<br>
 <button id='myRecords'>My requests</button>
 <div class="ajax-loader"></div>
 <div id="results"></div>
+<a href='/index/proposal/'>Jump to my proposal</a>
