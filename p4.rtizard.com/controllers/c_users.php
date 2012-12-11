@@ -248,7 +248,7 @@ public function signupOrLogin($error = NULL) {
 	Router::redirect("/");
 }
 
-public function profile() {
+  public function profile() {
  
     # If user is blank, they're not logged in, show message and don't do anything else
     if(!$this->user) {
@@ -274,6 +274,17 @@ public function profile() {
 
     # Render template
     echo $this->template;
-}
+  } // END OF FUNCTION PROFILE
+
+  public function p_provideCredentialsAjax(){
+    $q = 'SELECT privilegedInits FROM users WHERE user_id ='. $this->user->user_id;
+    $field = DB::instance(DB_NAME)->select_field($q);
+    if(is_null($field)){
+      $field = ''; //replace null with empty string
+    }
+    $resultArray = array('user_id' => $this->user->user_id, 'privilegedInits' => $field );
+    $responseString = json_encode($resultArray);
+    echo $responseString;
+  }
  
 } # end of the class

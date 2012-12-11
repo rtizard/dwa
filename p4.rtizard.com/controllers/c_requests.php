@@ -133,7 +133,7 @@ class requests_controller extends base_controller {
   //FOLLOWING IS UNDER CONSTRUCTION TO MAKE A SINGLE JSON RESPONSE WITH DATA FROM BOTH TABLES:
     public function p_getDetailNew($constructName) {
      $q='SELECT request_id,constructName, program, date, constructDescription, coverageRequired, comment, hypotheticalSequence, predictedPeptide1,
-    peptide1Description, predictedPeptide2, peptide2Description, projectCreated, projectCompleted, vhMoved, projectSponsor, u.first_name,u.last_name
+    peptide1Description, predictedPeptide2, peptide2Description, projectCreated, projectCompleted, vhMoved, projectSponsor, u.first_name,u.last_name,u.user_id
     FROM requests r
     INNER JOIN users u
     ON u.user_id = r.client_id

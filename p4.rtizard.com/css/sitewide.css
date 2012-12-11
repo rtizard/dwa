@@ -47,13 +47,13 @@ padding: 5px;
 
 th {
 text-align: left;
-   background-color: #9999CC;
-color: white;
+/*background-color: #9999CC;*/
+color: black;
 padding: 0.2em;
 }
 
 .fixedWidth_column {
-width: 120px;
+width: 200px;
 }
 
 td {
@@ -75,14 +75,79 @@ color: green;
 #requestList {
 position: absolute;
 top: 100px;
-width: 700px;
- height: 400px;
+width: 730px;
+ height: 250px;
 border: 1px solid gray;
 font-size: small;
 left: 10px;
 overflow-y: auto;
+}
+
+#detailAreaLabel {
+position: absolute;
+top: 340px;
+left: 10px;
+/*border: 1px solid gray;*/
+margin: 2px;
+padding: 2px;
+padding-left: 5px;
+padding-right: 6px;
+padding-top: 0px;
+padding-bottom: 6px;
 
 }
+
+#requestDetailUpper1{
+position: absolute;
+top: 390px;
+width: 230px;
+/*height: 90px;*/
+border: 1px solid gray;
+font-size: small;
+left: 10px;
+font-size: small;
+/*-moz-column-count:3; /* Firefox */
+/*-webkit-column-count:3; /* Safari and Chrome */
+/*column-count:3;*/
+}
+#requestDetailUpper2{
+position: absolute;
+top: 390px;
+width: 230px;
+/*height: 90px;*/
+border: 1px solid gray;
+font-size: small;
+left: 260px;
+font-size: small;
+/*-moz-column-count:3; /* Firefox */
+/*-webkit-column-count:3; /* Safari and Chrome */
+/*column-count:3;*/
+}
+#requestDetailUpper3{
+position: absolute;
+top: 390px;
+width: 230px;
+/*height: 90px;*/
+border: 1px solid gray;
+font-size: small;
+left: 510px;
+font-size: small;
+/*-moz-column-count:3; /* Firefox */
+/*-webkit-column-count:3; /* Safari and Chrome */
+/*column-count:3;*/
+}
+
+#requestDetailLower{
+position: absolute;
+top: 470px;
+width: 730px;
+height: 300px;
+border: 1px solid gray;
+font-size: small;
+left: 10px;
+overflow-y: auto;
+}
+
 @-webkit-keyframes ajax-loader-rotate {
   0% { -webkit-transform: rotate(0deg); }
   100% { -webkit-transform: rotate(360deg); }
@@ -97,6 +162,11 @@ overflow-y: auto;
 }
 
 .ajax-loader {
+position: absolute;
+top: 220px;
+border: 1px solid gray;
+left: 310px;
+
   opacity: .8;
   display: block;
   border-radius: 50%;
@@ -116,9 +186,51 @@ overflow-y: auto;
   -moz-animation: .85s ajax-loader-rotate steps(8) infinite;
   animation: .85s ajax-loader-rotate steps(8) infinite;
 }
-
+/* was used for Susan's 'loading... ' message. replaced by ajax loading animation
 #results {
 height: 20px;
 width: 100px;
 border: 1px solid gray;
+}
+*/
+.ascending { background: url('/images/sort_asc.png') no-repeat center right; }
+.descending { background: url('/images/sort_desc.png') no-repeat center right; }
+
+.ColorMe {
+color: red;
+}
+
+.backgroundHighlight { background-color: pink}
+
+.fieldLabel {border: 1px solid gray;
+font-weight: bold;
+  padding-left: 5px;
+margin: 2px;
+font-size: small;
+}
+.field {border: 1px solid gray;
+padding-left: 5px;
+margin: 2px;
+  font-size: small;
+}
+.bigField {border: 1px solid gray;
+padding-left: 5px;
+margin: 2px;
+  font-size: small;
+  height: 50px;
+  overflow-y: auto;
+}
+input[type="text"] {
+padding-left: 5px;
+margin-top: 2px;
+padding-top: 0px;
+font-size: x-small;
+}
+input[type="textarea"] {
+padding-left: 5px;
+margin-top: 2px;
+padding-top: 0px;
+font-size: x-small;
+  height: 50px;
+width: 650px;
 }

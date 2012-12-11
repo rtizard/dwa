@@ -1,0 +1,101 @@
+view-source:http://salzerdesign.com/test/fixedTable.html
+the author also has some interesting sort indicator arrows to think about.
+
+HTML:
+
+    <div class="fixed-table-container">
+      <div class="header-background"> </div>
+      <div class="fixed-table-container-inner">
+        <table cellspacing="0">
+          <thead>
+            <tr>
+              <th class="first">
+                <div class="th-inner">First</div>
+              </th>
+              <th class="second">
+                <div class="th-inner">Second</div>
+              </th>
+              <th class="third">
+                <div class="th-inner">Third</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>First</td>
+              <td>First</td>
+              <td>First</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+CSS:
+
+    td {
+      border-bottom: 1px solid #ccc;
+      padding: 5px;
+      text-align: left; /* IE */
+    }
+    td + td {
+      border-left: 1px solid #ccc;
+    }
+    th {
+      padding: 0 5px;
+      text-align: left; /* IE */
+    }
+    .header-background {
+      border-bottom: 1px solid black;
+    }
+    
+    /* above this is decorative, not part of the test */
+ 
+     
+    .fixed-table-container {
+      width: 50%;
+      height: 200px;
+      border: 1px solid black;
+      margin: 10px auto;
+      background-color: white;
+      /* above is decorative or flexible */
+      position: relative; /* could be absolute or relative */
+      padding-top: 30px; /* height of header */
+    }
+
+    .fixed-table-container-inner {
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: 100%;
+    }
+     
+    .header-background {
+      background-color: #D5ECFF;
+      height: 30px; /* height of header */
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+    }
+    
+    table {
+      background-color: white;
+      width: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .th-inner {
+      position: absolute;
+      top: 0;
+      line-height: 30px; /* height of header */
+      text-align: left;
+      border-left: 1px solid black;
+      padding-left: 5px;
+      margin-left: -5px;
+    }
+    .first .th-inner {
+        border-left: none;
+        padding-left: 6px;
+      }
