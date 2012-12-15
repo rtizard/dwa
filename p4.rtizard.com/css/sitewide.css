@@ -87,22 +87,39 @@ overflow-y: auto;
 position: absolute;
 top: 340px;
 left: 10px;
-/*border: 1px solid gray;*/
+/* 
+  border: 1px solid gray;
+ */
 margin: 2px;
 padding: 2px;
 padding-left: 5px;
 padding-right: 6px;
 padding-top: 0px;
 padding-bottom: 6px;
+width: 4000px;
+}
+#secondButtonBar{
+position: absolute;
+top: 360px;
+left: 410px;
+/* 
+border: 1px solid gray;
+ */
+}
+button {
+padding-right: 20px;
+padding-bottom: 5px;
+padding-top: 0px;
 
 }
-
 #requestDetailUpper1{
 position: absolute;
 top: 390px;
 width: 230px;
 /*height: 90px;*/
+/* 
 border: 1px solid gray;
+ */
 font-size: small;
 left: 10px;
 font-size: small;
@@ -115,7 +132,9 @@ position: absolute;
 top: 390px;
 width: 230px;
 /*height: 90px;*/
+/* 
 border: 1px solid gray;
+ */
 font-size: small;
 left: 260px;
 font-size: small;
@@ -128,7 +147,9 @@ position: absolute;
 top: 390px;
 width: 230px;
 /*height: 90px;*/
+/* 
 border: 1px solid gray;
+ */
 font-size: small;
 left: 510px;
 font-size: small;
@@ -142,7 +163,9 @@ position: absolute;
 top: 470px;
 width: 730px;
 height: 300px;
+/* 
 border: 1px solid gray;
+ */
 font-size: small;
 left: 10px;
 overflow-y: auto;
@@ -202,7 +225,10 @@ color: red;
 
 .backgroundHighlight { background-color: pink}
 
-.fieldLabel {border: 1px solid gray;
+.fieldLabel {
+/* 
+border: 1px solid gray;
+ */
 font-weight: bold;
   padding-left: 5px;
 margin: 2px;
@@ -218,6 +244,8 @@ padding-left: 5px;
 margin: 2px;
   font-size: small;
   height: 50px;
+  vertical-align: top;
+
   overflow-y: auto;
 }
 input[type="text"] {
@@ -233,4 +261,31 @@ padding-top: 0px;
 font-size: x-small;
   height: 50px;
 width: 650px;
+}
+textarea{
+padding-left: 5px;
+margin-top: 2px;
+padding-top: 0px;
+font-size: x-small;
+  height: 50px;
+width: 650px;
+
+
+}
+/* 
+
+#btnNewRequest{
+float: left;
+}
+#btnSaveReqChanges{
+float: right;
+}
+ */
+
+.sequenceContent { // wrap properly if a runon value of 100s of chars
+word-wrap: break-word;
+}
+
+.shortInput {
+width: 70px;
 }

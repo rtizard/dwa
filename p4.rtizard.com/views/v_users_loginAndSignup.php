@@ -1,5 +1,7 @@
 <div id="loginContainer">
 <h1 class="pageTitle">Welcome to Sequence Support!</h1>
+<p>Uptime returned: <?=passthru("uptime");?></p>
+
 <form id="loginForm" method='POST' action='/users/p_login'>
 <p class="formTitle">Returning? Please log in.</p>
    
