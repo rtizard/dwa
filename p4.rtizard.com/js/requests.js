@@ -138,16 +138,43 @@ $(document).ready(function() {
     get_privilegedInits: function(){
       return(this.privilegedInits);
     },
+
+    get_lastName: function(){
+      return(this.last_name);
+    },
+    
+    get_firstName: function(){
+      return(this.first_name);
+    },
+    
+    get_date: function(){
+      return(this.currentDate);
+    },
     
     setUserValues : function() {
+//     console.log ('in setUserValues');
        $.ajax({ 
           url: '/users/p_provideCredentialsAjax/',
           type: 'POST', //no data sent at all.
           async: false,
           success: function(response) {
-            responseObject = jQuery.parseJSON(response); 
+            responseObject = jQuery.parseJSON(response);
+            console.log(responseObject);
             userDataStore.user_id = responseObject.user_id;
             userDataStore.privilegedInits = responseObject.privilegedInits;// if privilegedInits is blank, user is NOT a superuser 
+
+            if(!userDataStore.privilegedInits){
+              userDataStore.privilegedInits= ''; //convert null to empty string.
+            }
+            userDataStore.privilegedInits = responseObject.privilegedInits;// if privilegedInits is blank, user is NOT a superuser 
+            userDataStore.last_name = responseObject.last_name;
+            userDataStore.first_name = responseObject.first_name;
+            dateToday = new Date();
+            userDataStore.currentDate = $.datepicker.formatDate('yy-mm-dd',dateToday);
+            console.log ('userDataStore.currentDate is '+userDataStore.currentDate);
+//             console.log ('formattedDate is '+formattedDate);
+ 
+//             console.log ('userDataStore.last_name is '+userDataStore.last_name);
           }
       });//END .AJAX call    
     } 
@@ -170,15 +197,39 @@ $(document).ready(function() {
     // Clears the detail object. Also called when page is first ready to set up an 'empty' object 
     clearRequestDetailObject: function(){
       requestDetailObject=new Object();
-      requestDetailObject.request = [];
-      requestDetailObject.submissions=[];
-    }, // END submissionDetailManager
-    
+
+      requestDetailObject.request=new Object();
+            requestDetailObject.submissions=new Object();
+
+      
+   //    requestDetailObject.request = [];
+//       requestDetailObject.submissions=[];
+    }, // END clearRequestDetailObject
+
     createNewRequest: function(){
       submissionDetailManager.clearRequestDetailObject();
-      submissionDetailManager.drawDetailAreaOnPage();//use the data loaded into the requestDetailObject property and paint the page
+      requestDetailObject.request['user_id']=userDataStore.get_user_id();
       requestDetailObject.request['request_id']= -1; // -1 will be the temporary request_id
-    
+      requestDetailObject.request['dbAction']= 'create'; // dbAction dictates what the mysql db will need to do
+      requestDetailObject.request['last_name']=userDataStore.get_lastName();
+      requestDetailObject.request['first_name']=userDataStore.get_firstName();
+      requestDetailObject.request['date']=userDataStore.get_date();
+      requestDetailObject.request['constructName']='';
+      requestDetailObject.request['program']='';
+      requestDetailObject.request['constructDescription']='';
+      requestDetailObject.request['coverageRequired']='';
+      requestDetailObject.request['comment']='';
+      requestDetailObject.request['hypotheticalSequence']='';
+      requestDetailObject.request['predictedPeptide1']='';
+      requestDetailObject.request['peptide1Description']='';
+      requestDetailObject.request['predictedPeptide2']='';
+      requestDetailObject.request['peptide2Description']='';
+      requestDetailObject.request['projectCreated']='';
+      requestDetailObject.request['projectCompleted']='';
+      requestDetailObject.request['vhMoved']='';
+      requestDetailObject.request['projectSponsor']='';
+
+      submissionDetailManager.drawDetailAreaOnPage();//use the data loaded into the requestDetailObject property and paint the page (NO samples)
     }, //END createNewRequest
     
     
@@ -187,17 +238,20 @@ $(document).ready(function() {
       this.clearRequestDetailObject();
 
       for (k in existingObject.request){
-//       console.log ('k is '+k);
+      console.log ('k is '+k);
         requestDetailObject.request[k]=existingObject.request[k];
       }
-      requestDetailObject.submissions=[];
+      requestDetailObject.request['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
+//       requestDetailObject.submissions=[]; // should be superfluous since this is already done by clear object method
       var i=0;
       var rowText = '';
       while(existingObject.submissions[i] !== undefined){
-        requestDetailObject.submissions[i]=[];
+        requestDetailObject.submissions[i]=new Object();
         for (k in existingObject.submissions[i]){
+      console.log ('k is '+k);
           requestDetailObject.submissions[i][k]=existingObject.submissions[i][k];
         }
+        requestDetailObject.submissions[i]['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
         i++;
       }
 
@@ -210,7 +264,7 @@ $(document).ready(function() {
     //  Non-superuser non-record owners will see non-editable text.
     drawDetailAreaOnPage: function(){
       var displayCase;
-      if (requestDetailObject.request.request_id == undefined){ //new
+      if (requestDetailObject.request.dbAction == 'create'){ //new
         displayCase = "RWNew"; // READ WRITE NEW RECORD
       } else if (submissionDetailManager.userIsRequestOwner){
       //  else if(submissionDetailManager.userIsRequestOwner || submissionDetailManager.submissionDetailManager){ // PRODUCTION SOON
@@ -228,8 +282,8 @@ $(document).ready(function() {
 //           html +='<p class="fieldLabel">Client</p><input type="text" value ="" />';     //BETTER: construct for current user!!    
 //           html +='<p class="fieldLabel">Client (last, first)</p><input type="text" value ="" />';            
 //           html +='<p class="fieldLabel">Client (first)</p><input type="text" value ="" />';            
-            html +='<p class="fieldLabel">Client (last first)</p><input type="text" class="shortInput" value ="" />';            
-            html +='<input type="text" class="shortInput" value ="" />';            
+            html +='<p class="fieldLabel">Client (last first)</p><input type="text" class="shortInput" value ="'+requestDetailObject.request.last_name+'" />';            
+            html +='<input type="text" class="shortInput" value ="'+requestDetailObject.request.first_name+'" />';            
             break;
           case("RWExisting"):
             $('#detailAreaLabel').html('<h4>Details for the selected request:</h4>');
@@ -252,7 +306,7 @@ $(document).ready(function() {
         switch(displayCase){
           case("RWNew"):
             html +='<p class="fieldLabel">Program name</p><input type="text" value ="" />';
-            html +='<p class="fieldLabel">Request Date</p><input type="text" value ="" />';
+            html +='<p class="fieldLabel">Request Date</p><input type="text" value ="'+requestDetailObject.request.date+'" />';
            break;
           case("RWExisting"):
             html +='<p class="fieldLabel">Program name</p><input type="text" value ="'+requestDetailObject.request.program+'" />';
@@ -301,35 +355,40 @@ $(document).ready(function() {
             html +='<p class="fieldLabel sequenceContent">Peptide1</p><p class="bigField">'+requestDetailObject.request.predictedPeptide1+'</p>';
         }//end Switch
 
+        $('#requestDetailLower').html(html); // write out the large field data without the table of related submissions
+        html = '';
+
 
         var tableText = '<table>';
         tableText +='<tr>';
-        tableText +='<th  id="submission_id" class="fixedWidth_column">submission_id</th>';
+        tableText +='<th  id="submission_id">Sample_id</th>';
         tableText +='<th  id="sampleName" class="fixedWidth_column">Sample Name</th>';
         tableText +='<th  id="date" class="fixedWidth_column">Date</th>';
-        tableText +='<th  id="volume" class="fixedWidth_column">Volume</th>';
-        tableText +='<th  id="concentration" class="fixedWidth_column">Concentration</th>';
+        tableText +='<th  id="volume">Vol.</th>';
+        tableText +='<th  id="concentration">Conc.</th>';
         tableText +='<th  id="prepType" class="fixedWidth_column">Prep Type</th>';
         tableText +='</tr>';
 
         var i=0;
         var rowText = '';
         while(requestDetailObject.submissions[i] !== undefined){
-          rowText='<tr class="sampleRow">';
-          rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].submission_id+'</td>';
+//                     rowText='<tr class="requestRow" id="'+responseObject[i].constructName+'">';
+
+          rowText='<tr class="sampleRow" id="'+requestDetailObject.submissions[i].submission_id+'">';
+          rowText+='<td>'+requestDetailObject.submissions[i].submission_id+'</td>';
           rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].sampleName+'</td>';
-          rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].date+'</td>';
-          rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].volume+'</td>';
-          rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].concentration+'</td>';
+          rowText+='<td  class="fixedWidth_column">'+requestDetailObject.submissions[i].date+'</td>';
+          rowText+='<td>'+requestDetailObject.submissions[i].volume+'</td>';
+          rowText+='<td>'+requestDetailObject.submissions[i].concentration+'</td>';
           rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].prepType+'</td>';            
           rowText+='</tr>';
           tableText +=rowText;
           i++;
         }
         tableText +='</table>';
-        html+=tableText;
+        html=tableText;
 
-        $('#requestDetailLower').html(html); // write out the large field data plus the table of related submissions
+        $('#sampleDetails').html(html); // write out the large field data plus the table of related submissions
 
     
     },  //END drawDetailAreaOnPage
@@ -352,11 +411,11 @@ $(document).ready(function() {
 //    The data is stored in a property of submissionDetailManager and then used to populate the page.
     getServerDetailData: function (callingFormObject){    
       var submissionArray;
-      var responseObject;//test at 6:22pm on Tues
+      var responseObject;
       $.ajax({
         beforeSend: function() {
           $('td').removeClass('backgroundHighlight');
-          $('#'+callingFormObject.attr('id')+'>td').addClass('backgroundHighlight');
+          $('#'+callingFormObject.attr('id')+'>td').addClass('backgroundHighlight');   
           // Display a loading message while waiting for the Ajax call to complete
           $('.ajax-loader').show();
         },
@@ -371,7 +430,55 @@ $(document).ready(function() {
           $('.ajax-loader').hide(); // turn off the progress indicator, we're done
         } //END on success
       }); //END .AJAX method    
-    } // END getServerDetailData
+    }, // END getServerDetailData
+    
+    
+     sendRequestToServer: function (){  
+    console.log('requestDetailObject.request.constructName is '+ requestDetailObject.request.constructName);
+             var myJSONText = JSON.stringify(requestDetailObject); //note that replacer is available to handle replacing certain values, not used here
+console.log('myJSONText is '+myJSONText);
+return;
+      var submissionArray;
+      var responseObject;
+      $.ajax({
+        beforeSend: function() {
+          
+          // Display a loading message while waiting for the Ajax call to complete
+          $('.ajax-loader').show();
+        },
+        url: "/requests/p_getRequestFromClient/",
+        type: 'POST',
+        success: function(response) {
+          responseObject = jQuery.parseJSON(response);
+          requestDetailObject = jQuery.parseJSON(response);
+          submissionDetailManager.setUserIsRequestOwner(responseObject.request.user_id);
+          submissionDetailManager.setRequestDetailObject(responseObject); // store a copy of this object as a property of submissionDetailManager          
+          submissionDetailManager.drawDetailAreaOnPage();//use the data just loaded into the requestDetailObject property and paint the page
+          $('.ajax-loader').hide(); // turn off the progress indicator, we're done
+        } //END on success
+      }); //END .AJAX method    
+    }, // END getServerDetailData
+    
+    
+//    getSampleDetailData goes to the master object and gets all information for a clicked upon sample 
+//    It reveals it in an area for editing, since the list itself is read only. 
+//    Should only work for record owner and privileged. No one else needs RW access to samples. Make row unclickable for nonowner nonpriv.
+    getSampleDetailData: function (callingFormObject){    
+      $('td').removeClass('sampleHighlight');
+      $('#'+callingFormObject.attr('id')+'>td').addClass('sampleHighlight');
+//       console.log("callingFormObject.attr('id') is " + callingFormObject.attr('id'));
+//       var i=0;
+//       var rowText = '';
+//       while(requestDetailObject.submissions[i] !== undefined){
+//         if(requestDetailObject.submissions[i]['submission_id']==callingFormObject.attr('id')){
+//           console.log ("requestDetailObject.submissions[i]['submission_id'] matches when i is " +i);
+//       
+//         }
+//        
+//       }
+
+       
+    } // END getSampleDetailData
     
   } // END of object literal submissionDetailManager
  
@@ -417,6 +524,11 @@ $(document).ready(function() {
       submissionDetailManager.getServerDetailData($(this));
     }); // END  $('.active').live("click",function() 
   
+    $('.sampleRow').live("click",function() {
+//     look to the existing object to retrieve the sample data to make read-write alongside table
+//       submissionDetailManager.getSampleDetailData($(this));
+      console.log("$(this).attr('id') is "+$(this).attr('id'));
+    }); // END  $('.active').live("click",function() 
   
     $('.headerSort').live("click",function() {
       sortField = $(this).attr('id');
@@ -433,6 +545,12 @@ $(document).ready(function() {
     $('#btnNewRequest').click(function() {
 //     console.log (requestDetailObject.request.constructName);
       submissionDetailManager.createNewRequest();
+    });
+
+
+    $('#btnSaveReqChanges').click(function() {
+//     console.log (requestDetailObject.request.constructName);
+      submissionDetailManager.sendRequestToServer();
     });
 
 }); //end doc ready

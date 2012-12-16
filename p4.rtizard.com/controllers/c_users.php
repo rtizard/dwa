@@ -277,13 +277,18 @@ public function signupOrLogin($error = NULL) {
   } // END OF FUNCTION PROFILE
 
   public function p_provideCredentialsAjax(){
-    $q = 'SELECT privilegedInits FROM users WHERE user_id ='. $this->user->user_id;
-    $field = DB::instance(DB_NAME)->select_field($q);
-    if(is_null($field)){
-      $field = ''; //replace null with empty string
-    }
-    $resultArray = array('user_id' => $this->user->user_id, 'privilegedInits' => $field );
-    $responseString = json_encode($resultArray);
+    $q = 'SELECT user_id,privilegedInits,first_name,last_name FROM users WHERE user_id ='. $this->user->user_id;
+//     $q = 'SELECT privilegedInits FROM users WHERE user_id ='. $this->user->user_id;
+    $singleton = DB::instance(DB_NAME)->select_row($q);
+   //echo $singleton;
+  //    $request_id = $singleton['request_id'];
+//     $resultArray['request'] = ($singleton);
+ //     $field = DB::instance(DB_NAME)->select_field($q);
+  //   if(is_null($field)){//need to implement this functionality in the new 
+//       $field = '';//replace null with empty string
+//     }
+//    // $resultArray = array('user_id' => $this->user->user_id, 'privilegedInits' => $singleton['privilegedInits'],'first_name' =>$singleton['first_name'], 'last_name'=> $singleton['last_name']);
+    $responseString = json_encode($singleton);
     echo $responseString;
   }
  

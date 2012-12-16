@@ -13,6 +13,9 @@ class requests_controller extends base_controller {
     die("Members only. <a href='/users/login'>Login</a>");
   }
   array_push($this->client_files, "/js/requests.js"); 
+    array_push($this->client_files, "ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"); 
+// <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+
 	$this->template->client_files = Utils::load_client_files($this->client_files);   
   }
 
@@ -130,7 +133,7 @@ class requests_controller extends base_controller {
     echo $requestObject;
   }
   
-  //FOLLOWING IS UNDER CONSTRUCTION TO MAKE A SINGLE JSON RESPONSE WITH DATA FROM BOTH TABLES:
+  //MAKES A SINGLE JSON RESPONSE WITH DATA FROM BOTH TABLES:
     public function p_getDetailNew($constructName) {
      $q='SELECT request_id,constructName, program, date, constructDescription, coverageRequired, comment, hypotheticalSequence, predictedPeptide1,
     peptide1Description, predictedPeptide2, peptide2Description, projectCreated, projectCompleted, vhMoved, projectSponsor, u.first_name,u.last_name,u.user_id

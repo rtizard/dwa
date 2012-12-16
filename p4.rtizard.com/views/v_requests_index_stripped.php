@@ -20,4 +20,5 @@ ID of current user is <?=$user->user_id;?>.<br>
 <div id='requestDetailUpper2'></div>
 <div id='requestDetailUpper3'></div>
 <div id='requestDetailLower'></div>
+<div id='sampleDetails'></div>
 <a href='/index/proposal/'>Jump to my proposal</a>

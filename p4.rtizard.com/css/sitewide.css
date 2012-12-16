@@ -162,13 +162,21 @@ font-size: small;
 position: absolute;
 top: 470px;
 width: 730px;
-height: 300px;
-/* 
+height: 230px;
 border: 1px solid gray;
- */
 font-size: small;
 left: 10px;
+overflow-y: hidden;
+}
+
+#sampleDetails{
+position: absolute;
+top: 730px;
+width: 600px;
+height: 150px;
 overflow-y: auto;
+border: 1px solid gray;
+font-size: small;
 }
 
 @-webkit-keyframes ajax-loader-rotate {
