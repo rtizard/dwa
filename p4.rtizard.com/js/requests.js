@@ -210,7 +210,7 @@ $(document).ready(function() {
         clearRequestDetailObject: function(){
             requestDetailObject=new Object();
             requestDetailObject.request=new Object();
-            requestDetailObject.samples=new Object();
+            requestDetailObject.samples=new Object(); // other than this the object sampleDataManager should handle requestDetailObject.samples
         }, // END clearRequestDetailObject
 
     createNewRequest: function(){
@@ -245,26 +245,18 @@ $(document).ready(function() {
     
       // copy the existingObject fetched from the database with detailed info into this object    
     setRequestDetailObject: function(existingObject){
-      this.clearRequestDetailObject();
+        this.clearRequestDetailObject();
 
-      for (k in existingObject.request){
-//       console.log ('k is '+k);
-        requestDetailObject.request[k]=existingObject.request[k];
-      }
-      requestDetailObject.request['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
-      var i=0;
-      var rowText = '';
-      while(existingObject.samples[i] !== undefined){
-        requestDetailObject.samples[i]=new Object();
-        for (k in existingObject.samples[i]){
-//       console.log ('k is '+k);
-          requestDetailObject.samples[i][k]=existingObject.samples[i][k];
+        for (k in existingObject.request){
+            //       console.log ('k is '+k);
+            requestDetailObject.request[k]=existingObject.request[k];
         }
-        requestDetailObject.samples[i]['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
-        i++;
-      }
+        requestDetailObject.request['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
+        // new code to call sampleDataManager to load the sample data into the object
+        sampleDataManager.loadSampleData(existingObject);
 
-    }, //END setRequestDetailObject
+
+    }, //END of function setRequestDetailObject
     
     
     // Create the detail area with request and sample data from data in requestDetailObject
@@ -402,58 +394,11 @@ $(document).ready(function() {
         $('#requestDetailLower').html(html); // write out the large field data without the table of related samples
         html = '';
 
+        sampleDataManager.drawSampleDetails(displayCase);
+              $('#sampleAreaLabel').html("Samples for the project");
+    $('#sampleBuilder').hide();
+       $('#btnNewSamples').show();
 
-        var tableText = '<table>';
-        tableText +='<tr>';
-        tableText +='<th  id="sample_id">Sample_id</th>';
-        tableText +='<th  id="sampleName" class="fixedWidth_column">Sample Name</th>';
-        tableText +='<th  id="date" class="fixedWidth_column">Date</th>';
-        tableText +='<th  id="volume">Vol.</th>';
-        tableText +='<th  id="concentration">Conc.</th>';
-        tableText +='<th  id="prepType" class="fixedWidth_column">Prep Type</th>';
-        tableText +='</tr>';
-
-        var i=0;
-        var rowText = '';
-        while(requestDetailObject.samples[i] !== undefined){
-            if(displayCase=="RO"){
-                rowText='<tr class="sampleRow" id="'+requestDetailObject.samples[i].sample_id+'">';
-                rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].sample_id+'" /></td>';
-                rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].sampleName+'" /></td>';
-
-                rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].date+'" /></td>';
-                rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].volume+'" /></td>';
-                rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].concentration+'" /></td>';
-                rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].prepType+'" /></td>';
-                rowText+='</tr>';
-
-            } else {
-                rowText='<tr class="sampleRow" id="'+requestDetailObject.samples[i].sample_id+'">';
-                rowText+='<td><input type="text" class="shortInput" value ="'+requestDetailObject.samples[i].sample_id+'" /></td>';
-                rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput column_sampleName" value ="'+requestDetailObject.samples[i].sampleName+'" /></td>';           
-                rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput column_date" value ="'+requestDetailObject.samples[i].date+'" /></td>';
-                rowText+='<td><input type="text" class="shortInput column_volume" value ="'+requestDetailObject.samples[i].volume+'" /></td>';
-                rowText+='<td><input type="text" class="shortInput column_concentration" value ="'+requestDetailObject.samples[i].concentration+'" /></td>';
-                rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput column_prepType" value ="'+requestDetailObject.samples[i].prepType+'" /></td>';
-                rowText+='</tr>';
-            } // END IF
-          tableText +=rowText;
-          i++;
-        } // end While
-        tableText +='</table>';
-        html = tableText;
-         $('#sampleDetails').html(html); // write out the table of related samples        
-
-        if(displayCase == "RO"){
-            $('#btnNewSamples').hide();
-            $('#sampleBuilder').hide();
-            
-        } else {
-            $('#btnNewSamples').show();
-            $('#sampleBuilder').show();
-
-        }
-        
     },  //END drawDetailAreaOnPage
     
     currentRequestID: 0,
@@ -579,12 +524,14 @@ console.log('requestDetailObject.request.dbAction is '+requestDetailObject.reque
         success: function(response) {
             $('#results').html(response);
             console.log('results back from server: '+response);
-            if(response!=0){
-                //really want the if statement to indicate server was OK with the request, I think this does it! 1==1
-                //THE DATA HAS BEEN SENT AND RECORD CREATED, NO LONGER IN CREATE MODE.
-            requestDetailObject.request.dbAction = 'none';
-//             requestDetailObject.request.dbAction = 'update';
-            }
+            requestDetailObject.request.dbAction = 'none'; // note that it will be additional work to return values
+                    //  from both request processor and samples processor: a json string reviewing all that occured. The if (response!=0) just won't cut it.
+//             if(response!=0){
+//                 //really want the if statement to indicate server was OK with the request, I think this does it! 1==1
+//                 //THE DATA HAS BEEN SENT AND RECORD CREATED, NO LONGER IN CREATE MODE.
+//             requestDetailObject.request.dbAction = 'none';
+// //             requestDetailObject.request.dbAction = 'update';
+//             }
             console.log ( 'in sendRequest... requestDetailObject.request.dbAction, requestDetailObject.request.constructName '+requestDetailObject.request.dbAction+', '+requestDetailObject.request.constructName);
             requestListManager.refreshTable(requestDetailObject.request.constructName);// load the list of existing requests
             console.log('requestDetailObject.request.constructName should be becoming highlighted: '+requestDetailObject.request.constructName);
@@ -618,7 +565,180 @@ console.log('requestDetailObject.request.dbAction is '+requestDetailObject.reque
     
   } // END of object literal requestDetailManager
  
- 
+ // *********************************************************************************************
+// OBJECT *SAMPLE DATA MANAGER* STARTS HERE. IT MANAGES THE DETAILS OF THE 
+//     SAMPLES SUBMITTED, WITHIN THE OBJECT SHARED WITH requestDetailManager called 
+//     requestDetailManager.requestDetailObject.
+// *********************************************************************************************
+
+    var sampleDataManager = {
+    
+        loadSampleData: function(existingObject){
+            var i=0;
+            var rowText = '';
+            while(existingObject.samples[i] !== undefined){
+                requestDetailObject.samples[i]=new Object();
+                for (k in existingObject.samples[i]){
+//                   console.log ('k is '+k);
+                    requestDetailObject.samples[i][k]=existingObject.samples[i][k];
+                }
+                requestDetailObject.samples[i]['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
+                i++;
+            }
+        }, // END of function loadSampleData
+     
+        drawSampleDetails: function(displayCase){
+            var html = '';
+            var tableText = '<table>';
+            tableText +='<tr>';
+            tableText +='<th  id="sample_id">Sample_id</th>';
+            tableText +='<th  id="sampleName" class="fixedWidth_column">Sample Name</th>';
+            tableText +='<th  id="date" class="fixedWidth_column">Date</th>';
+            tableText +='<th  id="volume">Vol.</th>';
+            tableText +='<th  id="concentration">Conc.</th>';
+            tableText +='<th  id="prepType" class="fixedWidth_column">Prep Type</th>';
+            tableText +='</tr>';
+
+            var i=0;
+            var rowText = '';
+            while(requestDetailObject.samples[i] !== undefined){
+                if(displayCase=="RO"){
+                    rowText='<tr class="sampleRow" id="'+requestDetailObject.samples[i].sample_id+'">';
+                    rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].sample_id+'" /></td>';
+                    rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].sampleName+'" /></td>';
+
+                    rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].date+'" /></td>';
+                    rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].volume+'" /></td>';
+                    rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].concentration+'" /></td>';
+                    rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.samples[i].prepType+'" /></td>';
+                    rowText+='</tr>';
+
+                } else {
+                    rowText='<tr class="sampleRow" id="'+requestDetailObject.samples[i].sample_id+'">';
+                    rowText+='<td><input type="text" class="shortInput" value ="'+requestDetailObject.samples[i].sample_id+'" /></td>';
+                    rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput column_sampleName" value ="'+requestDetailObject.samples[i].sampleName+'" /></td>';           
+                    rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput column_date" value ="'+requestDetailObject.samples[i].date+'" /></td>';
+                    rowText+='<td><input type="text" class="shortInput column_volume" value ="'+requestDetailObject.samples[i].volume+'" /></td>';
+                    rowText+='<td><input type="text" class="shortInput column_concentration" value ="'+requestDetailObject.samples[i].concentration+'" /></td>';
+                    rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput column_prepType" value ="'+requestDetailObject.samples[i].prepType+'" /></td>';
+                    rowText+='</tr>';
+                } // END IF
+              tableText +=rowText;
+              i++;
+            } // end While
+            tableText +='</table>';
+            html = tableText;
+             $('#sampleDetails').html(html); // write out the table of related samples        
+
+            if(displayCase == "RO"){
+                $('#btnNewSamples').hide();
+                $('#sampleBuilder').hide();
+            
+            } else {
+                $('#btnNewSamples').show();
+                $('#sampleBuilder').show();
+
+            }
+      
+        },   // END of function drawSampleDetails
+        processAddedSamples: function(){
+            var sampleNumberString = $('#sampleNumberString').val();
+            var volumeString = $('#volumeString').val();
+            var concString = $('#concString').val();
+            var prepTypeString = $('#prepTypeString').val(); // doesn't need recasting.
+//             console.log ('in processAddedSamples, sampleNumber String etc is '+sampleNumberString+','+volumeString+','+concString+','+prepTypeString);
+            var volume = parseFloat(volumeString);
+            var conc = parseFloat(concString);
+            var isolateArray = sampleNumberString.split(',');
+            var pad = "00";
+            var str = "";
+            var nextIsolateNumber = 0;
+            var paddedString='';
+            var constructName = requestDetailObject.request['constructName'];
+            console.log('constructName is '+constructName);
+            
+            existingSamples = [];
+            var i=0;
+            while(requestDetailObject.samples[i] !== undefined){
+                existingSamples[i]=requestDetailObject.samples[i].sampleName;
+                    i++;
+            }
+//             console.log ('value of i leaving inventory of existing is '+i);
+            var countExisting = i;
+            var stringExisting = existingSamples.sort().reverse().join(); //yields e.g. "pRT009-04^A,pRT009-03^A,pRT009-02^A,pRT009-01^A"
+            var position = 0;
+//             console.log ('A.charCodeAt(0) is '+"A".charCodeAt(0))
+//             console.log ('String.fromCharCode(65) is '+String.fromCharCode(65))
+//             console.log(existingSamples);
+            console.log(stringExisting);
+//             console.log(existingSamples);
+
+            for (i in isolateArray){
+                nextIsolateNumber = parseInt(isolateArray[i]);
+                str = "" + nextIsolateNumber;
+                paddedString = pad.substring(0, pad.length - str.length) + str;
+                console.log('element '+i+' is '+nextIsolateNumber + ' '+paddedString);
+                isolateBase = constructName+'-'+paddedString;
+                position = stringExisting.search(isolateBase);
+                baseLength = isolateBase.length;
+                console.log (' baseLength is '+baseLength);
+                console.log('position of ' +isolateBase+ ' is '+position);
+                if(position>-1){
+                    alphaIndex = stringExisting.substring(position+baseLength+1,position+baseLength+2);
+                    charcode=alphaIndex.charCodeAt(0);
+                    nextIndex=String.fromCharCode(charcode+1)
+                    console.log('nextIndex is ' + nextIndex);
+                } else {
+                    nextIndex="A";
+                }
+                var thisElementNum = parseInt(i)+countExisting;
+                requestDetailObject.samples[thisElementNum]=new Object();
+                requestDetailObject.samples[thisElementNum]['sampleName']=isolateBase+'^'+nextIndex;
+                requestDetailObject.samples[thisElementNum]['volume']=volume;
+                requestDetailObject.samples[thisElementNum]['concentration']=conc;
+                requestDetailObject.samples[thisElementNum]['prepType']=prepTypeString;
+                requestDetailObject.samples[thisElementNum]['date']=userDataStore.get_date();
+                requestDetailObject.samples[thisElementNum]['dbAction']='create';
+                requestDetailObject.samples[thisElementNum]['request_id']=requestDetailObject.request['request_id'];
+                requestDetailObject.samples[thisElementNum]['sample_id']=-1; // we'll use -1 conventionally to reflect to PHP that assignment will be made by mysql
+
+                console.log ("requestDetailObject.request['request_id]' is "+requestDetailObject.request['request_id']);
+                
+                //we're looking up displayCase again. it should be a property???
+   var displayCase;
+      if (requestDetailObject.request.dbAction == 'create'){ //new
+        displayCase = "RWNew"; // READ WRITE NEW RECORD
+      } else if (requestDetailManager.userIsRequestOwner){
+      //  else if(requestDetailManager.userIsRequestOwner || requestDetailManager.requestDetailManager){ // PRODUCTION SOON
+
+        displayCase = "RWExisting"; // EDITING AN EXISTING RECORD
+      } else {
+        displayCase = "RO"; // READ ONLY FOR UNPRIVILEGED NON-RECORD OWNERS
+      }// end if
+        sampleDataManager.drawSampleDetails(displayCase);
+        $('#sampleBuilder').hide(); // hide the builder 'dialog'
+        $('#sampleNumberString').val(); // clear out the isolate numbers, so it will be clean when unhidden
+//borrowed code follows
+
+     //        var i=0;
+//             var rowText = '';
+//             while(existingObject.samples[i] !== undefined){// 
+// //                 requestDetailObject.samples[i]=new Object();
+//                 for (k in existingObject.samples[i]){
+// //                   console.log ('k is '+k);
+//                     requestDetailObject.samples[i][k]=existingObject.samples[i][k];
+//                 }
+//                 requestDetailObject.samples[i]['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
+//                 i++;
+//             }
+
+
+//borrowed code above
+            } // END FOR i in isolateArray
+        }, // END of function processAddedSamples
+        
+    } // END of OBJECT sampleDataManager
+
 // RUNS ON DOC READY
   requestDetailManager.clearRequestDetailObject();// creates a blank object
 
@@ -630,6 +750,7 @@ console.log('requestDetailObject.request.dbAction is '+requestDetailObject.reque
   $('#btnSaveReqChanges').hide(); // hide the save changes button until a change has been made
     $('#sampleBuilder').hide();
 
+    $('#btnNewSamples').hide();
 
 // LISTENERS:
 
@@ -720,14 +841,14 @@ console.log('requestDetailObject.request.dbAction is '+requestDetailObject.reque
     });
     
     $('#btnNewSamples').click(function() {
-//       requestDetailManager.sendRequestInfoToServer();
 
+    $('#sampleBuilder').show(); 
     });
 
-$('#btnCommitSamples').click(function() {
-//       requestDetailManager.sendRequestInfoToServer();
-
+    $('#btnCommitSamples').click(function() {
+        sampleDataManager.processAddedSamples();
     });
+    
         $('[id=sampleDetails] input').live("blur",function() {
     // selector activates sample inputs but not request inputs
         console.log('blur in input detected');

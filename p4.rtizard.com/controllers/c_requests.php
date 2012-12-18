@@ -5,6 +5,8 @@ class requests_controller extends base_controller {
   public $singleton;
   public $samples;
   public $requestObject;
+  public $ajaxStatusReturn;
+  
   public function __construct() {
   parent::__construct();
 
@@ -133,66 +135,101 @@ class requests_controller extends base_controller {
     echo $requestObject;
   }
   
-  //MAKES A SINGLE JSON RESPONSE WITH DATA FROM BOTH TABLES:
+    //MAKES A SINGLE JSON RESPONSE WITH DATA FROM BOTH TABLES:
     public function p_getDetailNew($constructName) {
-     $q='SELECT request_id,constructName, program, date, constructDescription, coverageRequired, comment, hypotheticalSequence, predictedPeptide1,
-    peptide1Description, predictedPeptide2, peptide2Description, projectCreated, projectCompleted, vhMoved, projectSponsor, u.first_name,u.last_name,u.user_id
-    FROM requests r
-    INNER JOIN users u
-    ON u.user_id = r.client_id
-    WHERE r.constructName ="'.$constructName.'";';
-    $singleton = DB::instance(DB_NAME)->select_row($q);
-   //echo $singleton;
-     $request_id = $singleton['request_id'];
-    $resultArray['request'] = ($singleton);
-   // echo $requestObject;
-//2nd db call    
-      $q='SELECT *
-    FROM samples
-    WHERE request_id ="'. $request_id.'";';
-    $samples = DB::instance(DB_NAME)->select_rows($q);
-//      $requestObject = json_encode($samples,$singleton);
-       $resultArray['samples'] =($samples);
-       $responseString = json_encode($resultArray);
-       sleep(1);
- echo ($responseString);
-//   echo ('request_id is '.$request_id.'  '.$responseString);
- }
+        $q='SELECT request_id,constructName, program, date, constructDescription, coverageRequired, comment, hypotheticalSequence, predictedPeptide1,
+            peptide1Description, predictedPeptide2, peptide2Description, projectCreated, projectCompleted, vhMoved, projectSponsor, u.first_name,u.last_name,u.user_id
+            FROM requests r
+            INNER JOIN users u
+            ON u.user_id = r.client_id
+            WHERE r.constructName ="'.$constructName.'";';
+        $singleton = DB::instance(DB_NAME)->select_row($q);
+
+        $request_id = $singleton['request_id'];
+        $resultArray['request'] = ($singleton);
+
+        //2nd db call    
+        $q='SELECT *
+            FROM samples
+            WHERE request_id ="'. $request_id.'";';
+        $samples = DB::instance(DB_NAME)->select_rows($q);
+        $resultArray['samples'] =($samples);
+        $responseString = json_encode($resultArray);
+        sleep(.5);// just to give some elapsed time for the ajax spinner to entertain
+//         sleep(1);// just to give some elapsed time for the ajax spinner to entertain
+        echo ($responseString);
+    } // end of function p_getDetailNew
     
     
       //ACCEPTS a JSON STRING WITH DATA FROM BOTH TABLES TO INJECT INTO MYSQL:
   public function p_processRequestUpdate() {
 //   print_r($_POST);
- // print_r ($_POST[jsonString]);
+// print_r ($_POST[jsonString]);
 //return;
-    $requestObject = json_decode(($_POST['jsonString']));
-//      echo $requestObject->request->dbAction;
-        $inputArray['constructName'] = $requestObject->request->constructName;
-        $inputArray['program'] = $requestObject->request->program;
-        $inputArray['date'] = $requestObject->request->date;
-        $inputArray['constructDescription'] = $requestObject->request->constructDescription;
-        $inputArray['coverageRequired'] = $requestObject->request->coverageRequired;
-        $inputArray['hypotheticalSequence'] = $requestObject->request->hypotheticalSequence;
-        $inputArray['predictedPeptide1'] = $requestObject->request->predictedPeptide1;
-        $inputArray['projectSponsor'] = $requestObject->request->projectSponsor;
-        $inputArray['client_id'] = $requestObject->request->user_id;
+        $ajaxStatusReturn = "";
+       $requestObject = json_decode(($_POST['jsonString']));//$ requestObject scope is controller wide
+       
+        if ($requestObject->request->dbAction!='none'){
+//                      echo $requestObject->request->dbAction;
+            $inputArray['constructName'] = $requestObject->request->constructName;
+            $inputArray['program'] = $requestObject->request->program;
+            $inputArray['date'] = $requestObject->request->date;
+            $inputArray['constructDescription'] = $requestObject->request->constructDescription;
+            $inputArray['coverageRequired'] = $requestObject->request->coverageRequired;
+            $inputArray['hypotheticalSequence'] = $requestObject->request->hypotheticalSequence;
+            $inputArray['predictedPeptide1'] = $requestObject->request->predictedPeptide1;
+            $inputArray['projectSponsor'] = $requestObject->request->projectSponsor;
+            $inputArray['client_id'] = $requestObject->request->user_id;
 
-    if ($requestObject->request->dbAction=='create'){
- $dbResult = DB::instance(DB_NAME)->insert('requests', $inputArray);
-//    		print_r($inputArray); 
-   		echo $dbResult; 
-   		
-   } elseif ($requestObject->request->dbAction=='update') {
- 
-	$dbResult = DB::instance(DB_NAME)->update("requests", $inputArray, "WHERE request_id =".$requestObject->request->request_id); 
-// 	$dbResult = DB::instance(DB_NAME)->update("requests", $inputArray, "WHERE request_id ='".$requestObject->request->request_id."'"); 
+            if ($requestObject->request->dbAction=='create'){
+                $dbResult = DB::instance(DB_NAME)->insert('requests', $inputArray);
+                //    		print_r($inputArray); 
+//                 NOTE THAT ECHOING THE RESULT WORKED GREAT WHEN IGNORING THE SAMPLE INFO. NEED SOMETHING HEAVIER DUTY 
+//                  FOR BOTH AS SUCCESS/FAILURE INDICATOR
+//             echo $dbResult; 
+            } elseif ($requestObject->request->dbAction=='update') {
+                $dbResult = DB::instance(DB_NAME)->update("requests", $inputArray, "WHERE request_id =".$requestObject->request->request_id); 
+//             echo $dbResult; 
+            }
 
-   		echo $dbResult; 
-   }
-   
-   
+    }// end if dbaction is not none
+
+        // NOW PROCESS THE SAMPLES, IF ANY REQUIRE IT.
+
+//    print_r ($_POST[jsonString]);
+    $i = 0;
+    $returnValue = '';
+//     echo $requestObject->samples->$i->sampleName; // SUCCESS YAY
+//         while($requestObject->samples->$i !== undefined){
+        while(isset($requestObject->samples->$i)){ // this works
+            unset($inputArray); // we'll start fresh
+
+//             $returnValue .= $requestObject->samples->$i->dbAction.' '; 
+            if($requestObject->samples->$i->dbAction != 'none'){
+                $inputArray['request_id'] = $requestObject->samples->$i->request_id;
+                $inputArray['sampleName'] = $requestObject->samples->$i->sampleName;
+                $inputArray['date'] = $requestObject->samples->$i->date;
+                $inputArray['volume'] = $requestObject->samples->$i->volume;
+                $inputArray['concentration'] = $requestObject->samples->$i->concentration;
+                $inputArray['prepType'] = $requestObject->samples->$i->prepType;
+                if($requestObject->samples->$i->sample_id != -1){ // -1 by convention represents that it needs assignment
+                    $inputArray['sample_id'] = $requestObject->samples->$i->sample_id;
+                }
+
+                if($requestObject->samples->$i->dbAction == 'create'){
+                    $dbResult = DB::instance(DB_NAME)->insert('samples', $inputArray);
+                } elseif ($requestObject->samples->$i->dbAction == 'update') {
+                    $dbResult = DB::instance(DB_NAME)->update("samples", $inputArray, "WHERE sample_id =".$requestObject->samples->$i->sample_id); 
+                }
+            }        
+            $i++;
+        }
+echo $returnValue;
+
+
  } // END of   public function p_processRequestUpdate
  
+
  // AJAX--Uniqueness check for suggested construct name: returns 0 if not a duplicate so ZERO IS SUCCESS
      public function p_validateConstructName() {
         $_POST = DB::instance(DB_NAME)->sanitize($_POST);
