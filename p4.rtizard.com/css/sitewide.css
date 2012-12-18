@@ -34,7 +34,7 @@ font-size: small;
 
 .error {
 color: red;
-border: 1px solid red;
+/* border: 1px solid red; */
 }
 
 h2 {
@@ -199,9 +199,22 @@ overflow-y: hidden;
 #sampleDetails{
 position: absolute;
 top: 730px;
-width: 600px;
+width: 570px;
 height: 150px;
 overflow-y: auto;
+border: 1px solid gray;
+font-size: small;
+}
+
+#sampleBuilder {
+position: absolute;
+top: 705px;
+width: 150px;
+left: 605px;
+/* 
+height: 150px;
+overflow-y: auto;
+ */
 border: 1px solid gray;
 font-size: small;
 }

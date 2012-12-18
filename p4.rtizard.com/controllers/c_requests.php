@@ -3,7 +3,7 @@
 class requests_controller extends base_controller {
   public $requests;
   public $singleton;
-  public $submissions;
+  public $samples;
   public $requestObject;
   public function __construct() {
   parent::__construct();
@@ -123,13 +123,13 @@ class requests_controller extends base_controller {
 
   }
   
-  public function p_getSubmissions($request_id) {
+  public function p_getsamples($request_id) {
 //   sleep(2);
        $q='SELECT *
-    FROM submissions
+    FROM samples
     WHERE request_id ="'. $request_id.'";';
-    $submissions = DB::instance(DB_NAME)->select_rows($q);
-     $requestObject = json_encode($submissions);
+    $samples = DB::instance(DB_NAME)->select_rows($q);
+     $requestObject = json_encode($samples);
     echo $requestObject;
   }
   
@@ -148,11 +148,11 @@ class requests_controller extends base_controller {
    // echo $requestObject;
 //2nd db call    
       $q='SELECT *
-    FROM submissions
+    FROM samples
     WHERE request_id ="'. $request_id.'";';
-    $submissions = DB::instance(DB_NAME)->select_rows($q);
-//      $requestObject = json_encode($submissions,$singleton);
-       $resultArray['submissions'] =($submissions);
+    $samples = DB::instance(DB_NAME)->select_rows($q);
+//      $requestObject = json_encode($samples,$singleton);
+       $resultArray['samples'] =($samples);
        $responseString = json_encode($resultArray);
        sleep(1);
  echo ($responseString);
