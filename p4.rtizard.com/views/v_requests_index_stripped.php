@@ -8,7 +8,7 @@ ID of current user is <?=$user->user_id;?>.<br>
 <button id='myRecords'>My requests</button>
 <button id='tempSort'>Temp Sort</button>
 <div class="ajax-loader"></div>
-<!-- <div id="results"></div> -->
+<div id="results"></div>
 <div id="detailAreaLabel">
   <p>Please select a request from the list above</p>
 </div>
@@ -16,9 +16,11 @@ ID of current user is <?=$user->user_id;?>.<br>
   <button id='btnNewRequest'>Create a new request</button>
   <button id='btnSaveReqChanges'>Save the request changes</button>
 </div>
+<div class='error' id='requestError'></div>
 <div id='requestDetailUpper1'></div>
 <div id='requestDetailUpper2'></div>
 <div id='requestDetailUpper3'></div>
+<div id='requestDetailUpper4'></div>
 <div id='requestDetailLower'></div>
 <div id='sampleDetails'></div>
 <a href='/index/proposal/'>Jump to my proposal</a>

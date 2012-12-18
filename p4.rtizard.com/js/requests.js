@@ -4,7 +4,7 @@ $(document).ready(function() {
 //    This include making ajax calls to fetch the existing request data, managing the column header sorting, filtering (rudimentary, only
 //    allowing all records or my records only at present.
 // *********************************************************************************************
-  var requestListManager = {  // a literal object. Need not be instantiated. Only one 'instance' required. Syntax is different. Like "memory" game.
+  var requestListManager = {  // a literal object.  
 
     currentWhereQuery: '', 
     
@@ -60,7 +60,7 @@ $(document).ready(function() {
 //     refreshTable is the big function here which populates the upper, request list, table based on filter and sort conditions user selected
 //     An Ajax call is made into the requests controller p_fill_request_table2 and a JSON-encoded message returned with details on the sequence
 //     request and any related sample records.
-    refreshTable: function(){
+    refreshTable: function(highlightID){
       baseURL = '/requests/p_fill_request_table2/';
       
 //       For now the only filter options are 1) no filter, 2) show mine only
@@ -117,9 +117,21 @@ $(document).ready(function() {
             $('#'+sortIndicator['field']).addClass('descending');
           }
     
+        if (highlightID != ""){// passthru the row in the table that should be highlighted, if one was sent as parameter
+            requestListManager.setHighlightRow(highlightID);
+        }
         } // end SUCCESS: 
       });	// END $.ajax function
     }, //end FUNCTION refreshTable
+
+    setHighlightRow: function(inputId){
+    $('td').removeClass('backgroundHighlight');// unhighlight the line, if any, highlighted in the request list at the top of the page.
+    console.log('in setHighlightRow with Id input of '+inputId);
+        if (inputId != ""){
+        console.log('passed into the if inputID !="" block. Selector = '+'#'+inputId+'>td'); 
+            $('#'+inputId+'>td').addClass('backgroundHighlight');   
+        }
+    }
 
   } // END OF OBJECT *REQUEST LIST MANAGER*
   
@@ -181,12 +193,12 @@ $(document).ready(function() {
   } // END of object userDataStore
   
 // *********************************************************************************************
-// OBJECT *SUBMISSION DETAIL MANAGER* STARTS HERE. IT MANAGES THE DETAILS OF THE REQUEST AND 
+// OBJECT *REQUEST DETAIL MANAGER* STARTS HERE. IT MANAGES THE DETAILS OF THE REQUEST AND 
 //     SAMPLES SUBMITTED.
 // *********************************************************************************************
 
-  var submissionDetailManager ={
-    // submissionDetailManager handles the acquisition and display of detailed information about the submission
+  var requestDetailManager ={
+    // requestDetailManager handles the acquisition and display of detailed information about the submission
     // this includes display of fields not included in the list view managed by requestListManager
     // as well as the related samples submitted for the project (submissions table)
     // Handles whether the data is read only or can be edited. Privileged members and record owners can edit, others cannot.
@@ -207,29 +219,32 @@ $(document).ready(function() {
     }, // END clearRequestDetailObject
 
     createNewRequest: function(){
-      submissionDetailManager.clearRequestDetailObject();
-      requestDetailObject.request['user_id']=userDataStore.get_user_id();
-      requestDetailObject.request['request_id']= -1; // -1 will be the temporary request_id
-      requestDetailObject.request['dbAction']= 'create'; // dbAction dictates what the mysql db will need to do
-      requestDetailObject.request['last_name']=userDataStore.get_lastName();
-      requestDetailObject.request['first_name']=userDataStore.get_firstName();
-      requestDetailObject.request['date']=userDataStore.get_date();
-      requestDetailObject.request['constructName']='';
-      requestDetailObject.request['program']='';
-      requestDetailObject.request['constructDescription']='';
-      requestDetailObject.request['coverageRequired']='';
-      requestDetailObject.request['comment']='';
-      requestDetailObject.request['hypotheticalSequence']='';
-      requestDetailObject.request['predictedPeptide1']='';
-      requestDetailObject.request['peptide1Description']='';
-      requestDetailObject.request['predictedPeptide2']='';
-      requestDetailObject.request['peptide2Description']='';
-      requestDetailObject.request['projectCreated']='';
-      requestDetailObject.request['projectCompleted']='';
-      requestDetailObject.request['vhMoved']='';
-      requestDetailObject.request['projectSponsor']='';
+       requestListManager.setHighlightRow("");//unhighlight any existing highlighted line--it isn't current, this new one is.
 
-      submissionDetailManager.drawDetailAreaOnPage();//use the data loaded into the requestDetailObject property and paint the page (NO samples)
+     //  $('td').removeClass('backgroundHighlight');// unhighlight the line, if any, highlighted in the request list at the top of the page.
+        requestDetailManager.clearRequestDetailObject();
+        requestDetailObject.request['user_id']=userDataStore.get_user_id();
+//         console.log('in createNewRequest userDataStore.get_user_id() returns '+userDataStore.get_user_id());
+        requestDetailObject.request['request_id']= -1; // -1 will be the temporary request_id
+        requestDetailObject.request['dbAction']= 'create'; // dbAction dictates what the mysql db will need to do
+        requestDetailObject.request['last_name']=userDataStore.get_lastName();
+        requestDetailObject.request['first_name']=userDataStore.get_firstName();
+        requestDetailObject.request['date']=userDataStore.get_date();
+        requestDetailObject.request['constructName']='';
+        requestDetailObject.request['program']='';
+        requestDetailObject.request['constructDescription']='';
+        requestDetailObject.request['coverageRequired']='';
+        requestDetailObject.request['comment']='';
+        requestDetailObject.request['hypotheticalSequence']='';
+        requestDetailObject.request['predictedPeptide1']='';
+        requestDetailObject.request['peptide1Description']='';
+        requestDetailObject.request['predictedPeptide2']='';
+        requestDetailObject.request['peptide2Description']='';
+        requestDetailObject.request['projectCreated']='';
+        requestDetailObject.request['projectCompleted']='';
+        requestDetailObject.request['vhMoved']='';
+        requestDetailObject.request['projectSponsor']='';
+        requestDetailManager.drawDetailAreaOnPage();//use the mostly-empty data loaded into the requestDetailObject property and paint the page (NO samples)
     }, //END createNewRequest
     
     
@@ -238,7 +253,7 @@ $(document).ready(function() {
       this.clearRequestDetailObject();
 
       for (k in existingObject.request){
-      console.log ('k is '+k);
+//       console.log ('k is '+k);
         requestDetailObject.request[k]=existingObject.request[k];
       }
       requestDetailObject.request['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
@@ -248,7 +263,7 @@ $(document).ready(function() {
       while(existingObject.submissions[i] !== undefined){
         requestDetailObject.submissions[i]=new Object();
         for (k in existingObject.submissions[i]){
-      console.log ('k is '+k);
+//       console.log ('k is '+k);
           requestDetailObject.submissions[i][k]=existingObject.submissions[i][k];
         }
         requestDetailObject.submissions[i]['dbAction']= 'none'; // dbAction dictates what the mysql db will need to do
@@ -266,8 +281,8 @@ $(document).ready(function() {
       var displayCase;
       if (requestDetailObject.request.dbAction == 'create'){ //new
         displayCase = "RWNew"; // READ WRITE NEW RECORD
-      } else if (submissionDetailManager.userIsRequestOwner){
-      //  else if(submissionDetailManager.userIsRequestOwner || submissionDetailManager.submissionDetailManager){ // PRODUCTION SOON
+      } else if (requestDetailManager.userIsRequestOwner){
+      //  else if(requestDetailManager.userIsRequestOwner || requestDetailManager.requestDetailManager){ // PRODUCTION SOON
 
         displayCase = "RWExisting"; // EDITING AN EXISTING RECORD
       } else {
@@ -278,25 +293,29 @@ $(document).ready(function() {
       switch(displayCase){
           case("RWNew"):
             $('#detailAreaLabel').html('<h4>Please provide the details for a new request:</h4>');
-            html +='<p class="fieldLabel">Construct name</p><input type="text" value ="" />';
+            html +='<p class="fieldLabel">Construct name</p><input type="text" id="input_constructName" value ="" />';
 //           html +='<p class="fieldLabel">Client</p><input type="text" value ="" />';     //BETTER: construct for current user!!    
 //           html +='<p class="fieldLabel">Client (last, first)</p><input type="text" value ="" />';            
 //           html +='<p class="fieldLabel">Client (first)</p><input type="text" value ="" />';            
-            html +='<p class="fieldLabel">Client (last first)</p><input type="text" class="shortInput" value ="'+requestDetailObject.request.last_name+'" />';            
-            html +='<input type="text" class="shortInput" value ="'+requestDetailObject.request.first_name+'" />';            
+            html +='<p class="fieldLabel">Client (last first)</p><input type="text" id="input_last_name" class="shortInput" value ="'+requestDetailObject.request.last_name+'" />';            
+            html +='<input type="text" id="input_first_name" class="shortInput" value ="'+requestDetailObject.request.first_name+'" />';            
             break;
           case("RWExisting"):
             $('#detailAreaLabel').html('<h4>Details for the selected request:</h4>');
-            html +='<p class="fieldLabel">Construct name</p><input type="text" value ="'+requestDetailObject.request.constructName+'" />';
+            html +='<p class="fieldLabel">Construct name</p><input type="text" id="input_constructName" value ="'+requestDetailObject.request.constructName+'" />';
             ownerName = requestDetailObject.request.last_name + ', '+ requestDetailObject.request.first_name;
-            html +='<p class="fieldLabel">Client (last first)</p><input type="text" class="shortInput" value ="'+requestDetailObject.request.last_name+'" />';            
-            html +='<input type="text" class="shortInput" value ="'+requestDetailObject.request.first_name+'" />';            
+            html +='<p class="fieldLabel">Client (last first)</p><input type="text" class="shortInput" id="input_last_name" value ="'+requestDetailObject.request.last_name+'" />';            
+            html +='<input type="text" id="input_first_name" class="shortInput" value ="'+requestDetailObject.request.first_name+'" />';            
             break;
           case("RO"):
             $('#detailAreaLabel').html('<h4>Details for the selected request (read only):</h4>');
-            html +='<p class="fieldLabel">Construct name</p><p class="field">'+requestDetailObject.request.constructName+'</p>';
+            html +='<p class="fieldLabel">Construct name</p><input type="text" id="input_constructName" readonly="true" value ="'+requestDetailObject.request.constructName+'" />';
             ownerName = requestDetailObject.request.last_name + ', '+ requestDetailObject.request.first_name;
-            html +='<p class="fieldLabel">Client</p><p class="field">'+ownerName+'</p>';
+            html +='<p class="fieldLabel">Client (last first)</p><input type="text" class="shortInput" id="input_last_name" readonly="true" value ="'+requestDetailObject.request.last_name+'" />';            
+            html +='<input type="text" id="input_first_name" class="shortInput" readonly="true" value ="'+requestDetailObject.request.first_name+'" />';            
+//             html +='<p class="fieldLabel">Construct name</p><p class="field">'+requestDetailObject.request.constructName+'</p>';
+//             ownerName = requestDetailObject.request.last_name + ', '+ requestDetailObject.request.first_name;
+//             html +='<p class="fieldLabel">Client</p><p class="field">'+ownerName+'</p>';
         }//end Switch
         
         $('#requestDetailUpper1').html(html);//write out the leftmost pane
@@ -305,16 +324,20 @@ $(document).ready(function() {
 
         switch(displayCase){
           case("RWNew"):
-            html +='<p class="fieldLabel">Program name</p><input type="text" value ="" />';
-            html +='<p class="fieldLabel">Request Date</p><input type="text" value ="'+requestDetailObject.request.date+'" />';
+            html +='<p class="fieldLabel">Program name</p><input type="text" id="input_program" value ="" />';
+            html +='<p class="fieldLabel">Request Date</p><input type="text" id="input_date" value ="'+requestDetailObject.request.date+'" />';
            break;
           case("RWExisting"):
-            html +='<p class="fieldLabel">Program name</p><input type="text" value ="'+requestDetailObject.request.program+'" />';
-            html +='<p class="fieldLabel">Request Date</p><input type="text" value ="'+requestDetailObject.request.date+'" />';
+            html +='<p class="fieldLabel">Program name</p><input type="text" id="input_program" value ="'+requestDetailObject.request.program+'" />';
+            html +='<p class="fieldLabel">Request Date</p><input type="text" id="input_date" value ="'+requestDetailObject.request.date+'" />';
             break;
           case("RO"):
-            html +='<p class="fieldLabel">Program name</p><p class="field">'+requestDetailObject.request.program+'</p>';
-            html +='<p class="fieldLabel">Request Date</p><p class="field">'+requestDetailObject.request.date+'</p>';
+            html +='<p class="fieldLabel">Program name</p><input type="text" id="input_program" readonly="true" value ="'+requestDetailObject.request.program+'" />';
+            html +='<p class="fieldLabel">Request Date</p><input type="text" id="input_date" readonly="true" value ="'+requestDetailObject.request.date+'" />';
+
+           //  html +='<p class="fieldLabel">Program name</p><input type="text" id="input_program" readonly="true" value ="'+requestDetailObject.request.program+'" />';
+//             html +='<p class="fieldLabel">Request Date</p><input type="text" id="input_date" readonly="true" value ="'+requestDetailObject.request.date+'" />';
+          
         }//end Switch
 
         $('#requestDetailUpper2').html(html);//write out the middle pane
@@ -322,37 +345,62 @@ $(document).ready(function() {
 
         switch(displayCase){
           case("RWNew"):
-            html +='<p class="fieldLabel">Coverage required</p><input type="text" value ="" />';
-            html +='<p class="fieldLabel">Project Completed</p><input type="text" value ="" />';
+            html +='<p class="fieldLabel">Coverage required</p><input type="text" id="input_coverageRequired" value ="" />';
+            html +='<p class="fieldLabel">Project Completed</p><input type="text" id="input_projectCompleted" value ="" />';
            break;
           case("RWExisting"):
-            html +='<p class="fieldLabel">Coverage required</p><input type="text" value ="'+requestDetailObject.request.coverageRequired+'" />';
-            html +='<p class="fieldLabel">Project Completed</p><input type="text" value ="'+requestDetailObject.request.projectCompleted+'" />';
+            html +='<p class="fieldLabel">Coverage required</p><input type="text" id="input_coverageRequired" value ="'+requestDetailObject.request.coverageRequired+'" />';
+            html +='<p class="fieldLabel">Project Completed</p><input type="text" id="input_projectCompleted" value ="'+requestDetailObject.request.projectCompleted+'" />';
 
             break;
           case("RO"):
-            html +='<p class="fieldLabel">Coverage required</p><p class="field">'+requestDetailObject.request.coverageRequired+'</p>';
-            html +='<p class="fieldLabel">Project completed</p><p class="field">'+requestDetailObject.request.projectCompleted+'</p>';
+            html +='<p class="fieldLabel">Coverage required</p><input type="text" id="input_coverageRequired" readonly="true" value ="'+requestDetailObject.request.coverageRequired+'" />';
+            html +='<p class="fieldLabel">Project Completed</p><input type="text" id="input_projectCompleted" readonly="true" value ="'+requestDetailObject.request.projectCompleted+'" />';
+
+//             html +='<p class="fieldLabel">Coverage required</p><p class="field">'+requestDetailObject.request.coverageRequired+'</p>';
+//             html +='<p class="fieldLabel">Project completed</p><p class="field">'+requestDetailObject.request.projectCompleted+'</p>';
         }//end Switch
 
         $('#requestDetailUpper3').html(html);//write out the rightmost pane
+        
+        html = '';
+        switch(displayCase){
+          case("RWNew"):
+            html +='<p class="fieldLabel">Sponsor</p><input type="text" id="input_projectSponsor" value ="" />';
+//             html +='<p class="fieldLabel">Project Completed</p><input type="text" value ="" />';
+           break;
+          case("RWExisting"):
+            html +='<p class="fieldLabel">Sponsor</p><input type="text" id="input_projectSponsor" value ="'+requestDetailObject.request.projectSponsor+'" />';
+//             html +='<p class="fieldLabel">Project Completed</p><input type="text" value ="'+requestDetailObject.request.projectCompleted+'" />';
+
+            break;
+          case("RO"):
+            html +='<p class="fieldLabel">Sponsor</p><input type="text" id="input_projectSponsor" readonly="true" value ="'+requestDetailObject.request.projectSponsor+'" />';
+//          html +='<p class="fieldLabel">Sponsor</p><p class="field">'+requestDetailObject.request.projectSponsor+'</p>';
+//             html +='<p class="fieldLabel">Project completed</p><p class="field">'+requestDetailObject.request.projectCompleted+'</p>';
+        }//end Switch
+
+        $('#requestDetailUpper4').html(html);//write out the rightmost pane
         html = '';
 
         switch(displayCase){
           case("RWNew"):
-            html +='<p class="fieldLabel">Construct description</p><textarea></textarea>';
-            html +='<p class="fieldLabel">Hypothetical Sequence</p><textarea></textarea>';
-            html +='<p class="fieldLabel">Peptide1 Sequence</p><textarea></textarea>';
+            html +='<p class="fieldLabel">Construct description</p><textarea id="input_constructDescription"></textarea>';
+            html +='<p class="fieldLabel">Hypothetical Sequence</p><textarea id="input_hypotheticalSequence"></textarea>';
+            html +='<p class="fieldLabel">Peptide1 Sequence</p><textarea id="input_predictedPeptide1"></textarea>';
            break;
           case("RWExisting"):
-            html +='<p class="fieldLabel">Construct description</p><textarea>'+requestDetailObject.request.constructDescription+'</textarea>';
-            html +='<p class="fieldLabel">Hypothetical Sequence</p><textarea>'+requestDetailObject.request.hypotheticalSequence+'</textarea>';
-            html +='<p class="fieldLabel">Peptide1 Sequence</p><textarea>'+requestDetailObject.request.predictedPeptide1+'</textarea>';
+            html +='<p class="fieldLabel">Construct description</p><textarea id="input_constructDescription">'+requestDetailObject.request.constructDescription+'</textarea>';
+            html +='<p class="fieldLabel">Hypothetical Sequence</p><textarea id="input_hypotheticalSequence">'+requestDetailObject.request.hypotheticalSequence+'</textarea>';
+            html +='<p class="fieldLabel">Peptide1 Sequence</p><textarea id="input_predictedPeptide1">'+requestDetailObject.request.predictedPeptide1+'</textarea>';
             break;
           case("RO"):
-            html +='<p class="fieldLabel">Construct description</p><p class="bigField">'+requestDetailObject.request.constructDescription+'</p>';
-            html +='<p class="fieldLabel sequenceContent">Hypothetical sequence</p><p class="bigField">'+requestDetailObject.request.hypotheticalSequence+'</p>';
-            html +='<p class="fieldLabel sequenceContent">Peptide1</p><p class="bigField">'+requestDetailObject.request.predictedPeptide1+'</p>';
+            html +='<p class="fieldLabel">Construct description</p><textarea id="input_constructDescription" readonly="true">'+requestDetailObject.request.constructDescription+'</textarea>';
+            html +='<p class="fieldLabel">Hypothetical Sequence</p><textarea id="input_hypotheticalSequence" readonly="true">'+requestDetailObject.request.hypotheticalSequence+'</textarea>';
+            html +='<p class="fieldLabel">Peptide1 Sequence</p><textarea id="input_predictedPeptide1" readonly="true">'+requestDetailObject.request.predictedPeptide1+'</textarea>';
+//             html +='<p class="fieldLabel">Construct description</p><p class="bigField">'+requestDetailObject.request.constructDescription+'</p>';
+//             html +='<p class="fieldLabel sequenceContent">Hypothetical sequence</p><p class="bigField">'+requestDetailObject.request.hypotheticalSequence+'</p>';
+//             html +='<p class="fieldLabel sequenceContent">Peptide1</p><p class="bigField">'+requestDetailObject.request.predictedPeptide1+'</p>';
         }//end Switch
 
         $('#requestDetailLower').html(html); // write out the large field data without the table of related submissions
@@ -372,25 +420,34 @@ $(document).ready(function() {
         var i=0;
         var rowText = '';
         while(requestDetailObject.submissions[i] !== undefined){
-//                     rowText='<tr class="requestRow" id="'+responseObject[i].constructName+'">';
-
-          rowText='<tr class="sampleRow" id="'+requestDetailObject.submissions[i].submission_id+'">';
-          rowText+='<td>'+requestDetailObject.submissions[i].submission_id+'</td>';
-          rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].sampleName+'</td>';
-          rowText+='<td  class="fixedWidth_column">'+requestDetailObject.submissions[i].date+'</td>';
-          rowText+='<td>'+requestDetailObject.submissions[i].volume+'</td>';
-          rowText+='<td>'+requestDetailObject.submissions[i].concentration+'</td>';
-          rowText+='<td class="fixedWidth_column">'+requestDetailObject.submissions[i].prepType+'</td>';            
+            if(displayCase=="RO"){
+                      rowText='<tr class="sampleRow" id="'+requestDetailObject.submissions[i].submission_id+'">';
+          rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.submissions[i].submission_id+'" /></td>';
+           rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.submissions[i].sampleName+'" /></td>';
+           
+           rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.submissions[i].date+'" /></td>';
+           rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.submissions[i].volume+'" /></td>';
+           rowText+='<td><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.submissions[i].concentration+'" /></td>';
+           rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" readonly="true" value ="'+requestDetailObject.submissions[i].prepType+'" /></td>';
           rowText+='</tr>';
+
+            } else {
+                      rowText='<tr class="sampleRow" id="'+requestDetailObject.submissions[i].submission_id+'">';
+          rowText+='<td><input type="text" class="shortInput" value ="'+requestDetailObject.submissions[i].submission_id+'" /></td>';
+           rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" value ="'+requestDetailObject.submissions[i].sampleName+'" /></td>';           
+           rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" value ="'+requestDetailObject.submissions[i].date+'" /></td>';
+           rowText+='<td><input type="text" class="shortInput" value ="'+requestDetailObject.submissions[i].volume+'" /></td>';
+           rowText+='<td><input type="text" class="shortInput" value ="'+requestDetailObject.submissions[i].concentration+'" /></td>';
+           rowText+='<td class="fixedWidth_column"><input type="text" class="shortInput" value ="'+requestDetailObject.submissions[i].prepType+'" /></td>';
+          rowText+='</tr>';
+            } // END IF
           tableText +=rowText;
           i++;
-        }
+        } // end While
         tableText +='</table>';
         html=tableText;
 
-        $('#sampleDetails').html(html); // write out the large field data plus the table of related submissions
-
-    
+        $('#sampleDetails').html(html); // write out the table of related submissions
     },  //END drawDetailAreaOnPage
     
     currentRequestID: 0,
@@ -408,14 +465,14 @@ $(document).ready(function() {
     },
     
 //    getServerDetailData goes to the database and gets all information for a request and its accompanying sample submissions 
-//    The data is stored in a property of submissionDetailManager and then used to populate the page.
+//    The data is stored in a property of requestDetailManager and then used to populate the page.
     getServerDetailData: function (callingFormObject){    
       var submissionArray;
       var responseObject;
       $.ajax({
         beforeSend: function() {
-          $('td').removeClass('backgroundHighlight');
-          $('#'+callingFormObject.attr('id')+'>td').addClass('backgroundHighlight');   
+            requestListManager.setHighlightRow(callingFormObject.attr('id'));
+
           // Display a loading message while waiting for the Ajax call to complete
           $('.ajax-loader').show();
         },
@@ -424,48 +481,115 @@ $(document).ready(function() {
         success: function(response) {
           responseObject = jQuery.parseJSON(response);
           requestDetailObject = jQuery.parseJSON(response);
-          submissionDetailManager.setUserIsRequestOwner(responseObject.request.user_id);
-          submissionDetailManager.setRequestDetailObject(responseObject); // store a copy of this object as a property of submissionDetailManager          
-          submissionDetailManager.drawDetailAreaOnPage();//use the data just loaded into the requestDetailObject property and paint the page
+          requestDetailManager.setUserIsRequestOwner(responseObject.request.user_id);
+          requestDetailManager.setRequestDetailObject(responseObject); // store a copy of this object as a property of requestDetailManager          
+          requestDetailManager.drawDetailAreaOnPage();//use the data just loaded into the requestDetailObject property and paint the page
           $('.ajax-loader').hide(); // turn off the progress indicator, we're done
         } //END on success
       }); //END .AJAX method    
     }, // END getServerDetailData
     
+    checkAndRecordInput: function (callingObject){ 
+//      ERROR CHECKING GOES HERE BEFORE CALL TO USER EDITS (userEditsToDetailObject) BELOW 
+        var errorMessage="";
+        callingId= callingObject.attr('id');
+        console.log('calling object id is '+callingId);
+        callingField = callingId.replace('input_', '');
+console.log('requestDetailObject.request.dbAction is '+requestDetailObject.request.dbAction);
+        if((callingField=='constructName')&&(requestDetailObject.request.dbAction == 'create')){
+        console.log('constructname and create: check for uniqueness will be required.');
+// console.log ('callingObject.val() is '+callingObject.val());
+
+            $.ajax({
+                    beforeSend: function() {
+                        $('.ajax-loader').show();
+                    },
+                data: {constructName: callingObject.val()},
+                url: "/requests/p_validateConstructName/",
+                type: 'POST',
+                success: function(response) {
+                $('#results').html(response);
+                    console.log('response from uniqueness check is '+response);
+                    if(response != 0){//number of rows matching, so 0 is a good answer
+                    console.log ('in error assignment');
+//                         checkAndRecordInput.errorMessage = 'Invalid entry: '+callingObject.val()+' already exists.';
+                    }
+                $('.ajax-loader').hide(); // turn off the progress indicator, we're done
+                } //END on success
+        
+            }); //END .AJAX method    
+        } // END check on construct name
+        
+        console.log('calling field is '+callingField);
+        console.log (' field value is now '+ callingObject.val());
+        if(errorMessage == ""){
+            requestDetailManager.userEditsToDetailObject('requests',0, callingField,callingObject.val());
+        } else {
+            console.log('Error with field data: '+callingObject.val());
+        }
+//         this.userEditsToDetailObject('requests',0, callingField,callingObject.val());
+ }, // END function checkAndRecordInput
+ 
+ userEditsToDetailObject: function(table,index,field,value){
+    console.log ('table,index,field,value are '+table,index,field,value);
+    if(table=='requests'){
     
-     sendRequestToServer: function (){  
-    console.log('requestDetailObject.request.constructName is '+ requestDetailObject.request.constructName);
-             var myJSONText = JSON.stringify(requestDetailObject); //note that replacer is available to handle replacing certain values, not used here
-console.log('myJSONText is '+myJSONText);
-return;
-      var submissionArray;
-      var responseObject;
+        if(value != requestDetailObject.request[field]){
+            requestDetailObject.request[field]=value;
+            $('#btnSaveReqChanges').show(); // hide the save changes button until a change has been made
+//           Change dbAction none to update. If already update, or if create, leave it alone
+        console.log (" top of userEditsToDetailObject requestDetailObject.request['dbAction'] is  "+ requestDetailObject.request['dbAction']);
+
+            if(requestDetailObject.request['dbAction'] == 'none'){
+                requestDetailObject.request['dbAction']= 'update'; // dbAction dictates what the mysql db will need to do
+            }
+            console.log('Change was made before blur detected')
+        } else {
+            console.log('NO change made in field before blur detected')
+        }
+        console.log (" bottom of userEditsToDetailObject requestDetailObject.request['dbAction'] is  "+ requestDetailObject.request['dbAction']);
+
+    }
+ },
+ 
+    sendRequestInfoToServer: function (){  
+      var myJSONText = JSON.stringify(requestDetailObject); //note that replacer is available to handle replacing certain values, not used here
+        console.log('myJSONText is '+myJSONText);
       $.ajax({
         beforeSend: function() {
           
           // Display a loading message while waiting for the Ajax call to complete
           $('.ajax-loader').show();
         },
-        url: "/requests/p_getRequestFromClient/",
+        url: "/requests/p_processRequestUpdate/",
         type: 'POST',
+        data: {jsonString: myJSONText},
+
         success: function(response) {
-          responseObject = jQuery.parseJSON(response);
-          requestDetailObject = jQuery.parseJSON(response);
-          submissionDetailManager.setUserIsRequestOwner(responseObject.request.user_id);
-          submissionDetailManager.setRequestDetailObject(responseObject); // store a copy of this object as a property of submissionDetailManager          
-          submissionDetailManager.drawDetailAreaOnPage();//use the data just loaded into the requestDetailObject property and paint the page
+            $('#results').html(response);
+            console.log('results back from server: '+response);
+            if(response==1){
+                //really want the if statement to indicate server was OK with the request, I think this does it! 1==1
+                //THE DATA HAS BEEN SENT AND RECORD CREATED, NO LONGER IN CREATE MODE.
+            requestDetailObject.request.dbAction = 'update';
+            }
+            console.log ( 'in sendRequest... requestDetailObject.request.dbAction, requestDetailObject.request.constructName '+requestDetailObject.request.dbAction+', '+requestDetailObject.request.constructName);
+            requestListManager.refreshTable(requestDetailObject.request.constructName);// load the list of existing requests
+            console.log('requestDetailObject.request.constructName should be becoming highlighted: '+requestDetailObject.request.constructName);
+//             requestListManager.setHighlightRow(requestDetailObject.request.constructName);
           $('.ajax-loader').hide(); // turn off the progress indicator, we're done
         } //END on success
       }); //END .AJAX method    
-    }, // END getServerDetailData
+    }, // END sendRequestInfoToServer
     
     
 //    getSampleDetailData goes to the master object and gets all information for a clicked upon sample 
 //    It reveals it in an area for editing, since the list itself is read only. 
 //    Should only work for record owner and privileged. No one else needs RW access to samples. Make row unclickable for nonowner nonpriv.
     getSampleDetailData: function (callingFormObject){    
-      $('td').removeClass('sampleHighlight');
-      $('#'+callingFormObject.attr('id')+'>td').addClass('sampleHighlight');
+      requestListManager.setHighlightRow(callingFormObject.attr('id'));
+     //  $('td').removeClass('sampleHighlight');
+//       $('#'+callingFormObject.attr('id')+'>td').addClass('sampleHighlight');
 //       console.log("callingFormObject.attr('id') is " + callingFormObject.attr('id'));
 //       var i=0;
 //       var rowText = '';
@@ -480,17 +604,19 @@ return;
        
     } // END getSampleDetailData
     
-  } // END of object literal submissionDetailManager
+  } // END of object literal requestDetailManager
  
  
 // RUNS ON DOC READY
-  submissionDetailManager.clearRequestDetailObject();// creates a blank object
+  requestDetailManager.clearRequestDetailObject();// creates a blank object
 
   requestListManager.setCurrentWhere('all');
   requestListManager.refreshTable();// load the list of existing requests
   userDataStore.setUserValues();
-  submissionDetailManager.setUserPrivilege();// is the logged in user a 'super-user' who can edit all information, else only his/her own.
+  requestDetailManager.setUserPrivilege();// is the logged in user a 'super-user' who can edit all information, else only his/her own.
   $('.ajax-loader').hide(); // hide the spinning animation
+  $('#btnSaveReqChanges').hide(); // hide the save changes button until a change has been made
+
 
 // LISTENERS:
 
@@ -521,12 +647,12 @@ return;
 
 	  $('.requestRow').live("click",function() {
 //    Call the NEW SINGLE AJAX CALL METHOD TO RETURN A JSON STRING REPRESENTING BOTH REQUEST AND RELATED SUBMISSIONS
-      submissionDetailManager.getServerDetailData($(this));
+      requestDetailManager.getServerDetailData($(this));
     }); // END  $('.active').live("click",function() 
   
     $('.sampleRow').live("click",function() {
 //     look to the existing object to retrieve the sample data to make read-write alongside table
-//       submissionDetailManager.getSampleDetailData($(this));
+//       requestDetailManager.getSampleDetailData($(this));
       console.log("$(this).attr('id') is "+$(this).attr('id'));
     }); // END  $('.active').live("click",function() 
   
@@ -534,23 +660,57 @@ return;
       sortField = $(this).attr('id');
       requestListManager.setSortValue(sortField);
       requestListManager.refreshTable();
+    });
+    
+    $('textarea').live("blur",function() {
+    console.log('blur in textarea detected');
+    if($(this).attr('readonly')){
+        console.log ('this is readonly and can be ignored.');
+    } else {
+        requestDetailManager.checkAndRecordInput($(this));
+    }
+// console.log('id changed '+ $(this).attr('id'));
+//       sortField = $(this).attr('id');
+    });
+    
+    $('[id^=requestDetailUpper]>input').live("blur",function() {
+    // selector activates request inputs but not sample inputs
+        console.log('blur in input detected');
+    if($(this).attr('readonly')){
+        console.log ('this is readonly and can be ignored.');
+    } else {
+        requestDetailManager.checkAndRecordInput($(this));
+    }
 
+// console.log('id changed '+ $(this).attr('id'));
+//     console.log('changeData in input detected');//note that changeData works in Chrome, but is just like blur in Safari (firing even if nothing changed)
+//         requestDetailManager.checkAndRecordInput($(this));
+
+// console.log('id changed '+ $(this).attr('id'));
     });
     
     
     $('#tempSort').click(function() {
-      $('tr:has(#pRT001)>td').addClass('backgroundHighlight');
+    console.log('tempSort clicked');
+//       $('tr:has(#pRT001)>td').addClass('backgroundHighlight');
     });
 
     $('#btnNewRequest').click(function() {
 //     console.log (requestDetailObject.request.constructName);
-      submissionDetailManager.createNewRequest();
-    });
+    $('#btnSaveReqChanges').hide(); // hide the save changes button until a change has been made
 
+      requestDetailManager.createNewRequest();
+    console.log (" btnNewRequest clicked, after createNewRequest call:  requestDetailObject.request['dbAction'] is  "+ requestDetailObject.request['dbAction']);
+
+    });
 
     $('#btnSaveReqChanges').click(function() {
 //     console.log (requestDetailObject.request.constructName);
-      submissionDetailManager.sendRequestToServer();
+        console.log (" btnSaveReqChanges clicked:  requestDetailObject.request['dbAction'] is  "+ requestDetailObject.request['dbAction']);
+
+      requestDetailManager.sendRequestInfoToServer();
+    $('#btnSaveReqChanges').hide(); // hide the save changes button: they've just been saved.
+
     });
 
 }); //end doc ready

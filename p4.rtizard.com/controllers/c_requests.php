@@ -159,5 +159,51 @@ class requests_controller extends base_controller {
 //   echo ('request_id is '.$request_id.'  '.$responseString);
  }
     
+    
+      //ACCEPTS a JSON STRING WITH DATA FROM BOTH TABLES TO INJECT INTO MYSQL:
+  public function p_processRequestUpdate() {
+//   print_r($_POST);
+ // print_r ($_POST[jsonString]);
+//return;
+    $requestObject = json_decode(($_POST['jsonString']));
+//      echo $requestObject->request->dbAction;
+        $inputArray['constructName'] = $requestObject->request->constructName;
+        $inputArray['program'] = $requestObject->request->program;
+        $inputArray['date'] = $requestObject->request->date;
+        $inputArray['constructDescription'] = $requestObject->request->constructDescription;
+        $inputArray['coverageRequired'] = $requestObject->request->coverageRequired;
+        $inputArray['hypotheticalSequence'] = $requestObject->request->hypotheticalSequence;
+        $inputArray['predictedPeptide1'] = $requestObject->request->predictedPeptide1;
+        $inputArray['projectSponsor'] = $requestObject->request->projectSponsor;
+        $inputArray['client_id'] = $requestObject->request->user_id;
+
+    if ($requestObject->request->dbAction=='create'){
+ $dbResult = DB::instance(DB_NAME)->insert('requests', $inputArray);
+//    		print_r($inputArray); 
+   		echo $dbResult; 
+   		
+   } elseif ($requestObject->request->dbAction=='update') {
+ 
+	$dbResult = DB::instance(DB_NAME)->update("requests", $inputArray, "WHERE request_id =".$requestObject->request->request_id); 
+// 	$dbResult = DB::instance(DB_NAME)->update("requests", $inputArray, "WHERE request_id ='".$requestObject->request->request_id."'"); 
+
+   		echo $dbResult; 
+   }
+   
+   
+ } // END of   public function p_processRequestUpdate
+ 
+ // AJAX--Uniqueness check for suggested construct name: returns 0 if not a duplicate so ZERO IS SUCCESS
+     public function p_validateConstructName() {
+        $_POST = DB::instance(DB_NAME)->sanitize($_POST);
+        $constructName = ($_POST['constructName']);
+        $q = 'SELECT request_id 
+            FROM requests
+            WHERE constructName = "'.$constructName.'";';
+
+        $dbResult = DB::instance(DB_NAME)->select_rows($q, $type = 'array');
+        echo sizeof($dbResult); // number of rows, I'm hoping
+    }
+   
 } //end of class requests_controller
 
