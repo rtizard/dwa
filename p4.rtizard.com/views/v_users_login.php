@@ -1,5 +1,9 @@
-<form method='POST' action='/users/p_login'>
-<p class="formTitle">Returning? Please log in.</p>
+<div id="smallLoginContainer">
+<h1 class="pageTitle">Welcome to Sequence Support!</h1>
+
+<form id="soleLoginForm" method='POST' action='/users/p_login'>
+
+<p class="formTitle"><?=$banner ?></p>
    
    Email<br>
     <input type='text' name='email'>
@@ -22,3 +26,4 @@
     <input type='submit' value="Submit">
  
 </form>
+</div>

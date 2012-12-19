@@ -1,0 +1,192 @@
+body {
+font-family: Arial;
+
+}
+
+h2 {
+width:1150px;
+text-align: center;
+}
+
+.sequenceDisplay {
+font-family: Courier;
+width: 500px;
+padding: 10px;
+}
+
+#sequenceInput {
+height: 100px;
+width: 450px;
+margin-left: 20px;
+}
+
+#styledSequence {
+height: 400px; /* height value will be overridden once sequence becomes available */
+}
+
+#colorLegend {
+width: 230px;
+font-size: small;
+}
+.label {
+width: 500px;
+}
+
+.instruction {
+width: 500px;
+}
+
+#demoSequence{
+background-color: pink;
+}
+
+#demoSequence2{
+background-color: pink;
+}
+
+#radioButtons {
+position: absolute;
+top: 65px;
+left: 680px;
+}
+
+#dataBox {
+position: absolute;
+top: 65px;
+left: 920px;
+
+}
+
+#sequenceDisplay {
+position: absolute;
+top: 200px;
+width: 500px;
+/* height: 400px; */
+border: 1px solid gray;
+font-size: small;
+left: 680px;
+}
+
+#plainSequence { /* not seen in final version of page */
+word-wrap: break-word;
+}
+
+#residueButtons {
+position: absolute;
+top: 70px;
+left: 590px;
+width: 30px;
+}
+
+.button { /* 20 of these fill the div with id of residueButtons  */
+width: 20px;
+height: 18px;
+border: 1px solid gray;
+text-align: center;
+padding-top: 0px;
+border-radius: 6px;
+margin-top: 2px;
+cursor:pointer;
+}
+
+#aaInfoBox { /* when one of the aa buttons is clicked, all the info for that amino acid is dumped here */
+position: absolute;
+top: 530px;
+left: 545px;
+font-size: small;
+text-align: center;
+}
+	
+.red { /* used to highlight amino acids in the sequence when their button is clicked  ( as well as the button text itself) */
+color: red;
+}
+
+#comment {
+padding: 10px;
+font-size: large;
+}
+
+#createQuiz {
+background-color: pink;
+border-radius: 6px;
+border: 1px solid gray;
+width: 200px;
+padding: 5px;
+text-align: center;
+margin-top:15px;
+}
+
+#visibilityToggle { /*will be hidden in code, then revealed when quizzes are drawn */
+/* but it will only be drawn if sequence height >=400px. It is used to alternately truncate the displayed sequence and hide the quiz area */
+border-radius: 6px;
+border: 1px solid gray;
+width: 200px; 
+padding: 5px;
+text-align: center;
+margin-top: 15px;
+background-color: pink; /* the background color is white, despite this value here */
+}
+
+#quizArea { /* holds all the quizzes and the quiz head */
+/*border: 1px solid gray;*/
+margin-top:75px;
+width: 1230px;
+}
+
+#quizHead{
+text-align:center;
+}
+
+.quizBox { /* holds a single quiz */
+border: 1px solid gray;
+width: 300px;
+float: left;
+}
+
+.scoreboard {
+height:40px;
+padding: 20px;
+margin-left: 60px;
+}
+
+.good { /*correct guess in quiz area */
+color:green;
+}
+
+.bad { /*incorrect guess in quiz area */
+color:red;
+}
+
+
+table {
+cursor:pointer;
+border: 1px solid gray;
+width: 180px;
+float: left;
+margin-left:40px;
+padding:10px;
+}
+
+td { /* the quiz elements to be selected by clicking on */
+cursor:pointer;
+width: 80px;
+border: 1px solid gray;
+text-align: center;
+height: 18px;
+margin: 5px;
+padding: 2px;
+}
+
+.column2 {
+float: right;
+}
+
+
+/* NO LONGER IN THE DESIGN (i'm pretty sure)
+.quizButton {
+border: 1px solid gray;
+width: 20px;
+height: 20px;
+padding: 5px;
+}
+*/

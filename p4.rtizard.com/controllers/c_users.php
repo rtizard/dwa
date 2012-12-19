@@ -71,7 +71,7 @@ class users_controller extends base_controller {
 				# easier alternative: redirect to login only page with a welcoming message!
 				#even easier, but UGLY, right back to this page without further ado.
 		
-				Router::redirect('/users/signupOrLogin/');
+				Router::redirect('/users/login/?message=firstTime');
 
 
 			} else { # password too short
@@ -92,11 +92,20 @@ class users_controller extends base_controller {
 	# Setup view
 		$this->template->content = View::instance('v_users_login');
 		$this->template->title   = "Login";
-		
+// 		print_r ($_GET);
+		if(!empty($_GET)) {
+			if($_GET['message'] == 'firstTime'){
+                $this->template->content->banner = "Thank you for signing up!<br>Please login for practice.";
+            } else {
+                $this->template->content->banner = "Returning? Please log in.";
+            }
+        } else {
+            $this->template->content->banner = "Returning? Please log in.";
+        }
 	# Render template
 		echo $this->template;
 	
-	}
+	}// end of public function login()
 
 		
 public function signupOrLogin($error = NULL) {
@@ -175,8 +184,6 @@ public function signupOrLogin($error = NULL) {
 		if(!$token) {
 			#login failed--go directly to local version of redirect method for troubleshooting and error reporting
 			$this->login_redirectNonCore($token, $_POST['email'], "/requests/index/");
-
-		
 			} else {
 			# Store this token in a cookie
 			setcookie("token", $token, strtotime('+1 year'), '/');

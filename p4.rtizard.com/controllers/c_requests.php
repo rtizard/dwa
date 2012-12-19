@@ -33,8 +33,10 @@ class requests_controller extends base_controller {
 //   $requests = DB::instance(DB_NAME)->select_rows($q);
   //    echo Debug::dump($requests,"Contents of requests array");
   //       # Setup view
-  $this->template->content = View::instance('v_requests_index_stripped');
-  $this->template->title   = "Requests";
+        $this->template->content = View::instance('v_requests_index');
+        $this->template->title   = "Requests";
+        $this->menuArray = Array("Jump to my proposal" => "/index/proposal/", "Logout" => "/users/logout/");
+        $this->template->content->menuArray = $this->menuArray;
 
   //      //  # Pass data to the view
 //   $this->template->content->requests = $requests;
@@ -186,7 +188,8 @@ class requests_controller extends base_controller {
                 //    		print_r($inputArray); 
 //                 NOTE THAT ECHOING THE RESULT WORKED GREAT WHEN IGNORING THE SAMPLE INFO. NEED SOMETHING HEAVIER DUTY 
 //                  FOR BOTH AS SUCCESS/FAILURE INDICATOR
-//             echo $dbResult; 
+            echo $dbResult. ' should be the request_id autoincremented'; 
+            $newRequestId = $dbResult;
             } elseif ($requestObject->request->dbAction=='update') {
                 $dbResult = DB::instance(DB_NAME)->update("requests", $inputArray, "WHERE request_id =".$requestObject->request->request_id); 
 //             echo $dbResult; 
@@ -206,15 +209,23 @@ class requests_controller extends base_controller {
 
 //             $returnValue .= $requestObject->samples->$i->dbAction.' '; 
             if($requestObject->samples->$i->dbAction != 'none'){
-                $inputArray['request_id'] = $requestObject->samples->$i->request_id;
+                if($requestObject->samples->$i->request_id != -1){
+                    $inputArray['request_id'] = $requestObject->samples->$i->request_id; // use the valid value
+                } else {
+                    $inputArray['request_id'] = $newRequestId; // use the newly created mysql-supplied ai value
+                }
                 $inputArray['sampleName'] = $requestObject->samples->$i->sampleName;
                 $inputArray['date'] = $requestObject->samples->$i->date;
                 $inputArray['volume'] = $requestObject->samples->$i->volume;
                 $inputArray['concentration'] = $requestObject->samples->$i->concentration;
                 $inputArray['prepType'] = $requestObject->samples->$i->prepType;
+                
                 if($requestObject->samples->$i->sample_id != -1){ // -1 by convention represents that it needs assignment
-                    $inputArray['sample_id'] = $requestObject->samples->$i->sample_id;
-                }
+                    $inputArray['sample_id'] = $requestObject->samples->$i->sample_id;// supply the valid sample_id
+                }  else { // id == -1
+                    $requestObject->samples->$i->dbAction = 'create';// sloppy workaround for a subtle (?) bug where last in 
+                }                                         // series sometimes set to update rather than create, but -1 id is cue to create
+                  // value returned from the mysql insert
 
                 if($requestObject->samples->$i->dbAction == 'create'){
                     $dbResult = DB::instance(DB_NAME)->insert('samples', $inputArray);

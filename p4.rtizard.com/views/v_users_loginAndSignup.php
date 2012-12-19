@@ -42,7 +42,7 @@
 	<input type='text' name='email'>
 	<br><br>
 	
-	Password<br>
+	Password (length at least 4 characters)<br>
 	<input type='password' name='password'>
 	<br><br>
 	

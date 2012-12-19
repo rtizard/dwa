@@ -11,14 +11,26 @@ width: 700px;
 height: 550px;
 border: 1px solid gray; 
 }
-
-
 #loginForm {
 position: absolute;
 top: 150px;
 left: 50px;
 }
 
+#smallLoginContainer{
+position: absolute;
+top: 250px;
+left: 300px;
+width: 600px;
+height: 450px;
+border: 1px solid gray; 
+}
+
+#soleLoginForm {
+position: absolute;
+top: 150px;
+left: 150px;
+}
 
 #signupForm {
 position: absolute;
