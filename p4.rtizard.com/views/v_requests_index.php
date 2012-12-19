@@ -1,12 +1,17 @@
+<h1 class="pageTitle">Request Sequence Support</h1>
 <div id='requestList'>
 </div>
+<div id="firstButtonBar">
 <button id='allRecords'>All requests</button>
 <button id='myRecords'>My requests</button>
+<!-- 
 <button id='tempSort'>Temp Sort</button>
+ -->
+</div>
 <div class="ajax-loader"></div>
 <div id="results"></div>
 <div id="detailAreaLabel">
-  <p>Please select a request from the list above</p>
+  <p>Please select a request from the list above, or click -></p>
 </div><div id="sampleAreaLabel">
 </div>
 

@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<head>
-<!--  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
-  <script type="text/javascript" src="/sequenceDisplayObject.js"></script>
-	<link rel="stylesheet" href="/sequenceDisplay.css" type="text/css">
-	-->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-<!--      <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.2.js"></script> -->
-<!-- <script type="text/javascript" src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script> -->
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-<!-- <script src="js/bootstrap-tooltip.js"></script> -->
-  <script type="text/javascript" src="/sequenceDisplayObject.js"></script>
-	<link rel="stylesheet" href="/sequenceDisplay.css" type="text/css">
-	<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" type="text/css">
-
-</head>
-
-<body>
 <h2>Basic Protein Sequence Analysis</h2>
-<a href='/proposal.html'>Go to proposal</a><br>
+<ul id="masterMenu">
+<? foreach($menuArray as $key => $value): ?>
+<li> <a href=<?=$value ?>><?=$key ?></a>
+<? endforeach; ?>
+</ul>
 
 <!-- Sequence Entry -->	
 <h3>Instructions:</h3>
@@ -64,7 +50,4 @@
 <div id='createQuiz'>Click to create a panel of 4 quizzes!</div>
 <div id='visibilityToggle'>Click to hide the quiz</div>
 <div id='quizArea' class='alternateVisibility'></div>
-
-</body>
-</html>
 

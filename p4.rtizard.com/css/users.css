@@ -44,3 +44,36 @@ top: 500px;
 left: 50px;
 
 }
+
+
+.formTitle {
+font-size: large;
+color: green;
+}
+
+
+.pageTitle {
+position: absolute;
+top: 0;
+left: 180px; 
+}
+
+form {
+border: 1px solid gray; 
+/* position isn't defined here
+top: 250px;
+left: 10px;
+*/
+width: 250px;
+padding-left: 6px;
+padding-right: 6px;
+padding-top: 0px;
+padding-bottom: 6px;
+font-size: small;
+}
+
+.error {
+color: red;
+/* border: 1px solid red; */
+}
+

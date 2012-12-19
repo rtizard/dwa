@@ -399,7 +399,7 @@ $(document).ready(function() {
         html = '';
 
         sampleDataManager.drawSampleDetails(displayCase);
-              $('#sampleAreaLabel').html("Samples for the project");
+              $('#sampleAreaLabel').html("<h4>Samples for the project:</h4>");
     $('#sampleBuilder').hide();
        $('#btnNewSamples').show();
 

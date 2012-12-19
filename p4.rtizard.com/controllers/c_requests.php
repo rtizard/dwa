@@ -11,35 +11,25 @@ class requests_controller extends base_controller {
   parent::__construct();
 
   # Make sure user is logged in if they want to use anything in this controller
-  if(!$this->user) {
-    die("Members only. <a href='/users/login'>Login</a>");
-  }
+  		if(!($this->user)) {
+			# Send them to login or signup
+			Router::redirect("/users/signupOrLogin/");
+			} 
+
+  array_push($this->client_files, "/css/requests.css"); 
   array_push($this->client_files, "/js/requests.js"); 
     array_push($this->client_files, "ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"); 
-// <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-
 	$this->template->client_files = Utils::load_client_files($this->client_files);   
   }
 
   public function index() {
-  // query for all requests (simple example at the moment)
-  // $q = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
-//   FROM requests r
-//   INNER JOIN users u
-//   on u.user_id = r.client_id;';
-//  // where r.client_id ='. $this->user->user_id.';';
-// 
-//   # Run our query, store the results in the array $requests
-//   $requests = DB::instance(DB_NAME)->select_rows($q);
-  //    echo Debug::dump($requests,"Contents of requests array");
+
   //       # Setup view
         $this->template->content = View::instance('v_requests_index');
         $this->template->title   = "Requests";
-        $this->menuArray = Array("Jump to my proposal" => "/index/proposal/", "Logout" => "/users/logout/");
+        $this->menuArray = Array("Jump to my proposal" => "/index/proposal/", "Logout" => "/users/logout/", "P3 Peptide Analysis" => "/peptide/index/");
         $this->template->content->menuArray = $this->menuArray;
 
-  //      //  # Pass data to the view
-//   $this->template->content->requests = $requests;
 
   //      # Render template
   echo $this->template;
