@@ -701,7 +701,7 @@ $(document).ready(function() {
     $('#sampleBuilder').hide();
     $('#btnNewSamples').hide();
     $('#btnSaveSampleChanges').hide();
-    $('#sampleDialogHeader').html('Add Samples');
+    $('#sampleDialogHeader').html('Add Samples:');
     $('#sampleDialogHeader').removeClass('ColorMe');
     $('.hideEmpty').hide();
 
@@ -787,7 +787,7 @@ $(document).ready(function() {
     
 //     USER WANTS TO SEE THE ADD SAMPLE DIALOG
     $('#btnNewSamples').click(function() {
-            $('#sampleDialogHeader').html('Add Samples'); // changed to show errors at times, reset
+            $('#sampleDialogHeader').html('Add Samples:'); // changed to show errors at times, reset
             $('#sampleDialogHeader').removeClass('ColorMe');// changed to highlight errors at times, reset
             $('#sampleBuilder').show(); 
             $('#btnNewSamples').hide(); 

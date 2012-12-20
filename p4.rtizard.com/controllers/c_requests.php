@@ -1,131 +1,112 @@
 <?php
 
 class requests_controller extends base_controller {
-  public $requests;
-  public $singleton;
-  public $samples;
-  public $requestObject;
-  public $ajaxStatusReturn;
-  
-  public function __construct() {
-  parent::__construct();
+    public $requests;
+    public $singleton;
+    public $samples;
+    public $requestObject;
+    public $ajaxStatusReturn;
 
-  # Make sure user is logged in if they want to use anything in this controller
-  		if(!($this->user)) {
-			# Send them to login or signup
-			Router::redirect("/users/signupOrLogin/");
-			} 
+    public function __construct() {
+        parent::__construct();
 
-  array_push($this->client_files, "/css/requests.css"); 
-  array_push($this->client_files, "/js/requests.js"); 
-    array_push($this->client_files, "ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"); 
-	$this->template->client_files = Utils::load_client_files($this->client_files);   
-  }
+        # Make sure user is logged in if they want to use anything in this controller
+        if(!($this->user)) {
+            # Send them to login or signup
+            Router::redirect("/users/signupOrLogin/");
+        } 
 
-  public function index() {
+        array_push($this->client_files, "/css/requests.css"); 
+        array_push($this->client_files, "/js/requests.js"); 
+        array_push($this->client_files, "ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"); 
+        $this->template->client_files = Utils::load_client_files($this->client_files);   
+    }
 
-  //       # Setup view
+    public function index() {
+
+//       # Setup view
         $this->template->content = View::instance('v_requests_index');
         $this->template->title   = "Requests";
         $this->menuArray = Array("Jump to my proposal" => "/index/proposal/", "Logout" => "/users/logout/", "P3 Peptide Analysis" => "/peptide/index/");
         $this->template->content->menuArray = $this->menuArray;
+//      Render template
+        echo $this->template;
+    } // end of function index()
 
+    public function p_fill_request_table2() {// AJAX reply. For now gives all or mine only requests back via JSON for display in the upper table
+        $baseQuery = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
+            FROM requests r
+            INNER JOIN users u
+            ON u.user_id = r.client_id';
+        if($_POST['queryWhere']=='all'){ // still very basic set of query options: all or mine only
+            $q = $baseQuery;
+        } else { // only one other alternative at this point to 'all' for $option switch
+            $q = $baseQuery.' where r.client_id ='. $this->user->user_id;
+        }
 
-  //      # Render template
-  echo $this->template;
-  } // end of function index()
+        $q.= ' ORDER BY '.$_POST['sortField'];
 
-  public function p_fill_request_table2() {// AJAX reply. For now gives all or mine only requests back via JSON for display in the upper table
-    //     echo 'my response button click';
-    //     echo 'Option is '.$option;
-  //   echo $option;
-//     return;
-   $baseQuery = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
-      FROM requests r
-      INNER JOIN users u
-      ON u.user_id = r.client_id';
-    if($_POST['queryWhere']=='all'){ // still very basic set of query options: all or mine only
-    $q = $baseQuery;
-    } else { // only one other alternative at this point to 'all' for $option switch
-      $q = $baseQuery.' where r.client_id ='. $this->user->user_id;
-    }
+        if($_POST['sortDirection']==2){
+          $q.= ' DESC';
+        }
     
-    $q.= ' ORDER BY '.$_POST['sortField'];
-    
-    if($_POST['sortDirection']==2){
-      $q.= ' DESC';
-    }
-    
-    $q.= ';';//close the command, we're done!
-    $toJavascriptConsole = '$q is '.$q;
-//   echo $toJavascriptConsole;
-//   return;
-//     $debugResponse = '$q is '.
-     // Javascript:   data: {queryWhere: queryWhere, sortField: sortIndicator['field'], sortDirection: sortIndicator['directionCode']},
+        $q.= ';';//close the command, we're done!
+        $toJavascriptConsole = '$q is '.$q;
+        // Javascript:   data: {queryWhere: queryWhere, sortField: sortIndicator['field'], sortDirection: sortIndicator['directionCode']},
 
-    $requests = DB::instance(DB_NAME)->select_rows($q);
-    //    echo Debug::dump($requests,"Contents of requests array");
-    $requestObject = json_encode($requests);
-    echo $requestObject;
-  } // end of function p_fill_request_table2()
+        $requests = DB::instance(DB_NAME)->select_rows($q);
+        $requestObject = json_encode($requests);
+        echo $requestObject;
+    } // end of function p_fill_request_table2()
 
-   public function p_fill_request_table($option) {//old style that injects directly into the page
-//     echo 'my response button click';
-//     echo 'Option is '.$option;
- # Set up view...
-	# You're not using the master template, which is good. 
-	# This is b/c you don't need the doctype, head, full page, etc...
-	# You just need the "stub" of HTML which will get injected into the page
-		$template = View::instance('v_requests_index_sub1');
+    public function p_fill_request_table($option) {//NOT USED. Old style that injects directly into the page
+        # Set up view...
+        $template = View::instance('v_requests_index_sub1');
 
-  if($option=='all'){
-  $q = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
-  FROM requests r
-  INNER JOIN users u
-  ON u.user_id = r.client_id;';
-  } else { // only one other alternative at this point to 'all' for $option switch
-   $q = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
-  FROM requests r
-  INNER JOIN users u
-  ON u.user_id = r.client_id
-  where r.client_id ='. $this->user->user_id.';';
-  }
+        if($option=='all'){
+            $q = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
+                FROM requests r
+                INNER JOIN users u
+                ON u.user_id = r.client_id;';
+        } else { // only one other alternative at this point to 'all' for $option switch
+            $q = 'SELECT request_id,constructName, program, date, projectSponsor, u.first_name,u.last_name
+                FROM requests r
+                INNER JOIN users u
+                ON u.user_id = r.client_id
+                where r.client_id ='. $this->user->user_id.';';
+        }
 
-	 # Run our query, store the results in the array $requests
-  $requests = DB::instance(DB_NAME)->select_rows($q);
+         # Run our query, store the results in the array $requests
+        $requests = DB::instance(DB_NAME)->select_rows($q);
 
-	# Pass data to the View
+        # Pass data to the View
 		$template->requests = $requests;
 
-	# Render view...Whatever HTML we render is what JS will receive as a result of it's Ajax call
-		echo $template;
+        # Render view...Whatever HTML we render is what JS will receive as a result of it's Ajax call
+        echo $template;
 
-  }
+    }// END p_fill_request_table
   
-  public function p_getDetail($constructName) {
-//      sleep(2);
-     $q='SELECT request_id,constructName, program, date, constructDescription, coverageRequired, comment, hypotheticalSequence, predictedPeptide1,
-    peptide1Description, predictedPeptide2, peptide2Description, projectCreated, projectCompleted, vhMoved, projectSponsor, u.first_name,u.last_name
-    FROM requests r
-    INNER JOIN users u
-    ON u.user_id = r.client_id
-    WHERE r.constructName ="'.$constructName.'";';
-    $singleton = DB::instance(DB_NAME)->select_row($q);
-   //echo $singleton;
-   $requestObject = json_encode($singleton);
-    echo $requestObject;
-
-  }
+    public function p_getDetail($constructName) {
+        $q='SELECT request_id,constructName, program, date, constructDescription, coverageRequired, comment, hypotheticalSequence, predictedPeptide1,
+            peptide1Description, predictedPeptide2, peptide2Description, projectCreated, projectCompleted, vhMoved, projectSponsor, u.first_name,u.last_name
+            FROM requests r
+            INNER JOIN users u
+            ON u.user_id = r.client_id
+            WHERE r.constructName ="'.$constructName.'";';
+        $singleton = DB::instance(DB_NAME)->select_row($q);
+        $requestObject = json_encode($singleton);
+        echo $requestObject;
+    }
   
-  public function p_getsamples($request_id) {
-//   sleep(2);
-       $q='SELECT *
-    FROM samples
-    WHERE request_id ="'. $request_id.'";';
-    $samples = DB::instance(DB_NAME)->select_rows($q);
-     $requestObject = json_encode($samples);
-    echo $requestObject;
-  }
+    public function p_getsamples($request_id) {
+        $q='SELECT *
+            FROM samples
+            WHERE request_id ="'. $request_id.'";';
+        $samples = DB::instance(DB_NAME)->select_rows($q);
+        $requestObject = json_encode($samples);
+        echo $requestObject;
+    }
   
     //MAKES A SINGLE JSON RESPONSE WITH DATA FROM BOTH TABLES:
     public function p_getDetailNew($constructName) {
@@ -148,21 +129,15 @@ class requests_controller extends base_controller {
         $resultArray['samples'] =($samples);
         $responseString = json_encode($resultArray);
         sleep(.5);// just to give some elapsed time for the ajax spinner to entertain
-//         sleep(1);// just to give some elapsed time for the ajax spinner to entertain
         echo ($responseString);
     } // end of function p_getDetailNew
     
-    
       //ACCEPTS a JSON STRING WITH DATA FROM BOTH TABLES TO INJECT INTO MYSQL:
-  public function p_processRequestUpdate() {
-//   print_r($_POST);
-// print_r ($_POST[jsonString]);
-//return;
+    public function p_processRequestUpdate() {
         $ajaxStatusReturn = "";
-       $requestObject = json_decode(($_POST['jsonString']));//$ requestObject scope is controller wide
-       
+        $requestObject = json_decode(($_POST['jsonString']));//$ requestObject scope is controller wide
+
         if ($requestObject->request->dbAction!='none'){
-//                      echo $requestObject->request->dbAction;
             $inputArray['constructName'] = $requestObject->request->constructName;
             $inputArray['program'] = $requestObject->request->program;
             $inputArray['date'] = $requestObject->request->date;
@@ -175,29 +150,23 @@ class requests_controller extends base_controller {
 
             if ($requestObject->request->dbAction=='create'){
                 $dbResult = DB::instance(DB_NAME)->insert('requests', $inputArray);
-                //    		print_r($inputArray); 
 //                 NOTE THAT ECHOING THE RESULT WORKED GREAT WHEN IGNORING THE SAMPLE INFO. NEED SOMETHING HEAVIER DUTY 
 //                  FOR BOTH AS SUCCESS/FAILURE INDICATOR
             echo $dbResult. ' should be the request_id autoincremented'; 
             $newRequestId = $dbResult;
             } elseif ($requestObject->request->dbAction=='update') {
                 $dbResult = DB::instance(DB_NAME)->update("requests", $inputArray, "WHERE request_id =".$requestObject->request->request_id); 
-//             echo $dbResult; 
             }
 
-    }// end if dbaction is not none
+        }// end IF dbaction is not 'none'
 
         // NOW PROCESS THE SAMPLES, IF ANY REQUIRE IT.
 
-//    print_r ($_POST[jsonString]);
-    $i = 0;
-    $returnValue = '';
-//     echo $requestObject->samples->$i->sampleName; // SUCCESS YAY
-//         while($requestObject->samples->$i !== undefined){
+        $i = 0;
+        $returnValue = '';
         while(isset($requestObject->samples->$i)){ // this works
             unset($inputArray); // we'll start fresh
 
-//             $returnValue .= $requestObject->samples->$i->dbAction.' '; 
             if($requestObject->samples->$i->dbAction != 'none'){
                 if($requestObject->samples->$i->request_id != -1){
                     $inputArray['request_id'] = $requestObject->samples->$i->request_id; // use the valid value
@@ -215,7 +184,7 @@ class requests_controller extends base_controller {
                 }  else { // id == -1
                     $requestObject->samples->$i->dbAction = 'create';// sloppy workaround for a subtle (?) bug where last in 
                 }                                         // series sometimes set to update rather than create, but -1 id is cue to create
-                  // value returned from the mysql insert
+                                                          // value returned from the mysql insert
 
                 if($requestObject->samples->$i->dbAction == 'create'){
                     $dbResult = DB::instance(DB_NAME)->insert('samples', $inputArray);
@@ -225,23 +194,20 @@ class requests_controller extends base_controller {
             }        
             $i++;
         }
-echo $returnValue;
-
-
- } // END of   public function p_processRequestUpdate
+        echo $returnValue;
+    } // END of   public function p_processRequestUpdate
  
 
- // AJAX--Uniqueness check for suggested construct name: returns 0 if not a duplicate so ZERO IS SUCCESS
+    // AJAX--Uniqueness check for suggested construct name: returns 0 if not a duplicate so ZERO IS SUCCESS
      public function p_validateConstructName() {
         $_POST = DB::instance(DB_NAME)->sanitize($_POST);
         $constructName = ($_POST['constructName']);
         $q = 'SELECT request_id 
             FROM requests
             WHERE constructName = "'.$constructName.'";';
-
         $dbResult = DB::instance(DB_NAME)->select_rows($q, $type = 'array');
         echo sizeof($dbResult); // number of rows, I'm hoping
     }
    
-} //end of class requests_controller
+} // END OF CLASS requests_controller
 
