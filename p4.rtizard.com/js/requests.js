@@ -61,18 +61,17 @@ $(document).ready(function() {
 //     An Ajax call is made into the requests controller p_fill_request_table2 and a JSON-encoded message returned with details on the sequence
 //     request and any related sample records.
     refreshTable: function(highlightID){
-      baseURL = '/requests/p_fill_request_table2/';
-      
+        baseURL = '/requests/p_fill_request_table2/';
+
 //       For now the only filter options are 1) no filter, 2) show mine only
-      if (this.currentWhereQuery=='mine') {
-        queryWhere = 'mine';
-      } else {
-        queryWhere = 'all';
-      }
+        if (this.currentWhereQuery=='mine') {
+            queryWhere = 'mine';
+        } else {
+            queryWhere = 'all';
+        }
     
-      sortIndicator = this.returnSortCondition();
-            
-    	$.ajax({ 
+        sortIndicator = this.returnSortCondition();
+        $.ajax({ 
         url: baseURL,
         type: 'POST',
         data: {queryWhere: queryWhere, sortField: sortIndicator['field'], sortDirection: sortIndicator['directionCode']},
@@ -716,6 +715,7 @@ $(document).ready(function() {
 			url: "/requests/p_fill_request_table2/mine/",
 // 			url: "/requests/p_fill_request_table/mine/",
 			type: 'POST',
+            data: {queryWhere: queryWhere, sortField: sortIndicator['field'], sortDirection: sortIndicator['directionCode']},
 			success: function(response) {
                 requestListManager.setCurrentWhere('mine');
                 requestListManager.refreshTable();
@@ -730,6 +730,7 @@ $(document).ready(function() {
 			url: "/requests/p_fill_request_table2/all/",
 // 			url: "/requests/p_fill_request_table/all/",
 			type: 'POST',
+            data: {queryWhere: queryWhere, sortField: sortIndicator['field'], sortDirection: sortIndicator['directionCode']},
 			success: function(response) {
       requestListManager.setCurrentWhere('all');
       requestListManager.refreshTable();
