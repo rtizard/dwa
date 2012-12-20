@@ -9,9 +9,9 @@
  -->
 </div>
 <div class="ajax-loader"></div>
-<div id="results"></div>
+<!-- <div id="results"></div> -->
 <div id="detailAreaLabel">
-  <p>Please select a request from the list above, or click -></p>
+  <p><h4>Please select a request from the list, or click -></h4></p>
 </div><div id="sampleAreaLabel">
 </div>
 
@@ -28,8 +28,8 @@
 <div id='requestDetailUpper2'></div>
 <div id='requestDetailUpper3'></div>
 <div id='requestDetailUpper4'></div>
-<div id='requestDetailLower'></div>
-<div id='sampleDetails'></div>
+<div id='requestDetailLower' class='hideEmpty'></div>
+<div id='sampleDetails' class='hideEmpty'></div>
 <div id='sampleBuilder'>
 <p class="fieldLabel" id="sampleDialogHeader"></p>
   <p class="fieldLabel">Sample Numbers</p><input type="text" id="sampleNumberString" title='Enter sample numbers separated by commas (1,2,3)' value ="" />
