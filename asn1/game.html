@@ -1,0 +1,767 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+  <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <meta charset="utf-8"> 
+    <meta name="viewport" content="width=device-width,  initial-scale=1.0, maximum-scale=1" /> 
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    
+<title>The Game</title> 
+    
+<style type="text/css"> 
+body {font: 12px "Helvetica Neue", Helvetica, Arial, sans-serif;}
+      /* layouts smaller than 600px, iPhone and mobiles */
+      @media handheld and (max-width: 480px), screen and (max-device-width: 480px), screen and (max-width: 800px)  {
+          header, section, div {width: auto;}
+      }
+#theSurface {
+position: absolute;
+top: 35px;
+left: 20px;
+height: 250px;
+width: 500px;
+}
+#controlBall {float: left;}
+#moveBall {display:none;}
+#animateBall {display:none;}
+#resumeButton {display:none;} /*  resume and suspend are not actually used in the current version */
+#suspendButton {display:none;}
+#scoreboard {height: 15px; font-size: large;}
+#errorDisplay {font-size: large; font-weight:bold; text-align:center; color: red;} /* Bummer: text-align ignored on iPhone, but not iPad */
+
+.field {width: 40px;display: inline-block;}
+.line{height: 6px;  background-color: saddlebrown;}
+.hidden {visibility:hidden;}
+.removed {display:none;}
+
+</style>
+
+</head> 
+<body onLoad="window.addEventListener('deviceorientation', onOrientation);" onorientationchange="updateOrientation();"> 
+
+  <input type="button" id="animateBall" onclick="initializeAnimateBall();" value="Animate Ball" > 
+  <input type="button" id="suspendButton" onclick="suspendPlay();" value="Suspend Play" > 
+  <input type="button" id="resumeButton" onclick="resumePlay();" value="Resume Play" >
+  <div id='errorDisplay' class='removed'>Orientation Errors displayed here!></div>
+  <div id='scoreboard'>
+  <input type="button" id="mainMenu"  value="To Menu" > 
+  <input type="button" id="controlBall"  value="Release Ball" > 
+  <div class ='field'></div>  <!-- Just some spacing to the right of the button -->
+  <span id ='changeToGameOver'>Balls Left:</span>
+    <div class ='field' id='ballsRemaining'></div>  
+  Score:
+    <div class ='field' id='score'></div>
+  Time:
+    <div class ='field' id='elapsedTime'></div> 
+  </div>
+
+  <div id="theSurface">
+  </div>
+
+<script type="text/javascript"> 
+
+// a Quick Note:    ******************************************************************************************
+//
+// This app has been tested on an iPad2, a Nexus 10 tablet, and an iPhone5. Behavior on other devices is unknown.
+// I have an unusual approach, I'm guessing, to defining the solid barrier walls. The entire playing surface is
+// covered by Rectangles (Rects), which have 1-3 solid sides and 1-3 permeable sides. How to deal with hitting a
+// wall becomes a matter of determining which Rect you're in and are you departing it? One interesting bug/feature
+// that I have left intact is that hitting a wall barrier edge on can result in a skateboard-on-a-rail effect as the
+// moving 'ball' follows the wall. 
+// Moving from the tablet to the iPhone reduces the number of obstacles and bonus pots of gold (both are 'thingies')
+// which I have left the same size; so the ratio of thingie, target, and ball to the playing surface which is smaller
+// are quite different. I wish I could have done a better job of styling the non-game pages, which do suck. 
+//
+//    Richard Tizard 2/26/2013.
+
+// RECT CONSTRUCTOR ******************************************************************************************
+
+    // Rect is the constructor function that initializes new Rect objects. Requires Rect.prototype.
+    
+    // Every part of theSurface of the game consists of  adjacent rectangles. The ball bounces off 'solid' walls and 
+    // passes through non-solid walls. WALLS ONLY EXIST AS PARTS OF RECTS. Quirky implementation, I'm sure.
+    
+  function Rect(id,x1,y1,x2,y2,solid1,solid2,solid3,solid4) {
+    this.id=id; // name as string e.g. 'Rect1'
+    this.x1 = tabletMultiplier*x1; // x coordinate of the left wall
+    this.y1 = tabletMultiplier*y1; // y coordinate of the ceiling
+    this.x2 = tabletMultiplier*x2; // x coordinate of the right wall
+    this.y2 = tabletMultiplier*y2; // y coordinate of the floor
+    this.solid1=solid1; // BOOLEAN: is ceiling a solid obstacle to the ball (or passage to next rect)
+    this.solid2=solid2; // BOOLEAN: is right wall a solid obstacle to the ball (or passage to next rect)
+    this.solid3=solid3; // BOOLEAN: is floor a solid obstacle to the ball (or passage to next rect)
+    this.solid4=solid4; // BOOLEAN: is left wall a solid obstacle to the ball (or passage to next rect)
+  }
+
+// RECT PROTOTYPE ******************************************************************************************
+
+ // Rect.prototype is unsurprisingly the prototype for all Rects.
+  Rect.prototype = {
+
+    drawRectWalls: function () {
+  //     if(this.solid1)    myLinejQuery(this.x1,this.y1,this.x2-this.x1,true);
+  //     if(this.solid2)    myLinejQuery(this.x2,this.y1,this.y2-this.y1,false);
+  //     if(this.solid3)    myLinejQuery(this.x1,this.y2,this.x2-this.x1,true);
+  //     if(this.solid4)    myLinejQuery(this.x1,this.y1,this.y2-this.y1,false);
+
+      if(this.solid1)    myLineClean(this.x1,this.y1,this.x2-this.x1,true); // x,y for line origin, length, isHorizontal? (else vertical)
+      if(this.solid2)    myLineClean(this.x2,this.y1,this.y2-this.y1,false);
+      if(this.solid3)    myLineClean(this.x1,this.y2,this.x2-this.x1,true);
+      if(this.solid4)    myLineClean(this.x1,this.y1,this.y2-this.y1,false);
+
+    },  // end of function drawRectWalls
+  
+    findWallCollision: function () {
+      //first, is the ball initially inside this rectangle? Need to adjust for 16px diameter ball on right wall and floor reckonings.
+      // here we're relying on and manipulating the global ball position and ball velocity variables directly.
+  
+      // First determine if the ball is in current Rect
+      if(x+8 >= this.x1 && x+8 <= this.x2 && y+8 >= this.y1 && y+8 <= this.y2) { //in-ness is judged by the center of the ball
+        //it's currently in the rect, is it trying to depart? Shall we let it, depending on wall solidity?
+        if(((x+deltaX > this.x2-21)&&(this.solid2)) || ((x+deltaX < this.x1) &&(this.solid4))){
+
+          deltaX*= bounce; // bounce should either be -0.4 (control ball) or -1 (move ball and animate ball)
+        }
+        if(((y+deltaY > this.y2-16) &&(this.solid3)) || ((y+deltaY < this.y1+5)&&(this.solid1))){
+          deltaY*= bounce; 
+      }
+      }
+ 
+    }, // end of function findWallCollision
+
+
+  }//End Rect.prototype
+
+// THINGIE CONSTRUCTOR ******************************************************************************************
+
+  function thingie(id,type,centerX,centerY,points){ // thingies: bomb (ends ball), banana peel (random slip & loses points) or gold (adds pts.)
+    this.id=id;
+    this.type=type; // currently bombs, banana peels or pots of gold. Bomb contact terminates ball. Others add or subtract points.
+    this.centerX=tabletMultiplier*centerX;
+    this.centerY=tabletMultiplier*centerY;
+    this.points=points;
+    this.distanceToBall = 0; //updated continuously
+    this.ignoreAlreadyHit = false;
+  }
+  
+// THINGIE PROTOTYPE ******************************************************************************************
+
+  thingie.prototype = {
+    drawthingie: function (){
+      var thingie = document.createElement('img');
+      thingie.src = 'images/'+this.type+'.png';
+      thingie.id = this.id;
+      theSurface.appendChild(thingie);
+      thingie.style.position = "absolute";
+      thingie.style.left=(this.centerX-16)+"px";
+      thingie.style.top=(this.centerY-16)+"px";
+    }, // end of drawthingie
+    
+     wasIHit : function(){  //x and y are global variables for the x and y coordinates of the top left of the moving ball
+      this.distanceToBall = Math.round(Math.sqrt( (x+8-this.centerX)*(x+8-this.centerX)+(y+8-this.centerY)*(y+8-this.centerY) ));
+
+      if ((this.distanceToBall<20)&&(!this.ignoreAlreadyHit)){
+      
+        if( this.points == 0) { // oh no, a bomb
+          scoreboard.ballWasDestroyed();
+          return false;
+        } else {
+        
+          if(this.points ==-10) { // banana peel, tricky acceleration possible
+            deltaX = (Math.random() -.5)*15;
+            deltaY = (Math.random() -.5)*15;
+          } else { // it's gold, good stuff
+            deltaX *= .75;  // slows down on impact by 25%
+            deltaY *= .75;
+          }
+        
+          document.getElementById(this.id).className='hidden';
+          scoreboard.changeScore(this.points);
+          this.ignoreAlreadyHit = true;
+          return true;        
+                }
+      } else {// target missed, obviously not a fatal encounter
+      return true
+      } 
+      
+     }, // end of function wasIHit
+
+   //    if ((this.distanceToBall<18)&&(!this.ignoreAlreadyHit)){
+//       
+//         if( this.points == 0) {
+//           scoreboard.ballWasDestroyed();
+//           return false;
+//         } else {
+//         // add (positive or negative) points to the score:
+//           scoreboard.changeScore(this.points);
+//           deltaX *= .75;  // slows down on impact by 25%
+//           deltaY *= .75;
+//           this.ignoreAlreadyHit = true;
+//           document.getElementById(this.id).className='hidden';
+//           return true;
+//         } 
+//       } else {return true}; // target missed, obviously not a fatal encounter
+
+     
+      repaintHiddenThingie : function (){ // resets all centerX values to starting ones, and removes hidden classes
+        document.getElementById(this.id).className = '';
+        this.ignoreAlreadyHit = false;
+      },
+     
+     
+    } // end of thingie.prototype
+      
+// FUNCTION MYLINECLEAN() ******************************************************************************************
+    // only use of myLineClean is to draw the solid lines defining the rectangles of the surface
+    // 'clean' refers to the non-use of jQuery, that's all
+
+  function myLineClean(x1,y1,length,isHorizontal) {
+
+    var line = document.createElement('div');
+    line.style.width = length+'px';
+    line.className=('line');
+    line.style.position = "absolute";
+  
+    if (isHorizontal){   
+      line.style.webkitTransform= 'translate('+x1+'px,'+(y1)+'px)';
+    } else {
+      line.style.webkitTransform= 'translate('+x1+'px,'+(y1)+'px) rotate(90deg)';
+      line.style.webkitTransformOrigin = '0% 0%';
+    }
+      theSurface.appendChild(line);
+  // 	  document.body.theSurface.appendChild(line);
+
+  } // end of function myLineClean (no jQuery)
+    
+// FUNCTION ONORIENTATION() ******************************************************************************************
+  // This function fires On Orientation determination and supplies the acceleration values to be supplied to the ball 
+  // by controlActiveBall as the global vars accelX and accelY. Takes device native orientation into account.
+  
+  function onOrientation(event) {
+    crntBeta = Math.round(event.beta);
+    crntGamma = Math.round(event.gamma);
+    var yArrowScale = .1*(crntBeta);
+    var xArrowScale = .1*(crntGamma); //negative scaling reverses the direction of arrow 180deg
+    if(landscapeNative) {  //is it a tablet?
+      accelX=gravity*Math.sin(.0175*crntGamma); // since landscape is default, beta gamma work one way
+      accelY=gravity*Math.sin(.0175*crntBeta); 
+    } else { // it's a phone
+      accelX=gravity*Math.sin(.0175*crntBeta); // since portrait is default, in landscape mode beta and gamma are backwards-ish.
+      accelY=gravity*Math.sin(-.0175*crntGamma); 
+    }
+  }  // END onOrientation
+
+// FUNCTION UPDATEORIENTATION() ******************************************************************************************
+  //Fires on orientation change to express the software's happiness or not with the new orientation.
+  //Freezes ball movement if unhappy with suspendFlag.
+  
+  function updateOrientation() {
+
+  if (!landscapeNative){ // e.g. iPhone or iPad2
+    if (window.orientation != 90)  {
+      orientText = 'Please use landscape orientation';
+      suspendFlag = true;
+      document.getElementById('scoreboard').className = 'removed';
+      document.getElementById('errorDisplay').className = '';
+      document.getElementById('errorDisplay').innerHTML = orientText;
+
+      setTimeout(function() {updateOrientation()},1000);
+    } else { // orientation is now okay
+      suspendFlag = false;
+      document.getElementById('scoreboard').className = '';
+      document.getElementById('errorDisplay').className = 'removed';
+
+//       if(document.getElementById('controlBall').classList.contains('hidden')){ //check if ball is currently in play POOR, time lag?
+      if(ballIsInPlay){ //check if ball is currently in play
+        controlActiveBall();
+      }
+
+    }
+  }  else if (window.orientation != 0)  { // e.g. android tablet
+      orientText = 'Please turn your tablet to landscape orientation';
+      suspendFlag = true;
+      document.getElementById('scoreboard').className = 'removed';
+      document.getElementById('errorDisplay').className = '';
+      document.getElementById('errorDisplay').innerHTML = orientText;
+
+      setTimeout(function() {updateOrientation()},1000);
+    } else {  // orientation is now okay
+      suspendFlag = false; 
+      document.getElementById('scoreboard').className = '';
+      document.getElementById('errorDisplay').className = 'removed';
+
+      if(ballIsInPlay){ //check if ball is currently in play
+        controlActiveBall();
+      }
+    }
+//    }
+
+  }//end of function updateOrientation
+  
+// THREE NON FUNCTIONING FUNCTIONS ******************************************************************************************
+
+// NB: the THREE FUNCTIONS initializeAnimateBall(), animateActiveBall(), movActiveBall()
+// are remnants of the development process
+
+  function moveActiveBall (){
+    //moveActiveBall is used on touch in one version of the program to move the ball a certain distance, obeying wall and targetHole rules
+    if(!suspendFlag){
+      deltaX = 13;
+      deltaY =6;
+      for(key in rect_array) { 
+        rect_array[key].findWallCollision();
+      }
+      x = x+deltaX;
+      y = y+deltaY;
+      activeBall.style['WebkitTransform']= 'translate('+x+'px,'+y+'px)';
+      var wasTargetHit =target.wasIHit(x,y);
+      for(key in thingie_array) { 
+        thingie_array[key].wasIHit();
+      }
+    }
+  } // end moveActiveBall
+  
+ function initializeAnimateBall(){
+  deltaX=2;
+  deltaY=2;
+  bounce=-1;
+  animateActiveBall();
+ }
+ 
+ function animateActiveBall (){
+
+    for(key in rect_array) { 
+      rect_array[key].findWallCollision();
+    }
+    deltaX= deltaX+(.1*(Math.random()-.5));   // deltaX will vary a bit 
+    if(Math.abs(deltaX)>5) deltaX = .8*deltaX;
+    x = x+deltaX;
+    y = y+deltaY;
+    activeBall.style['WebkitTransform']= 'translate('+x+'px,'+y+'px)';
+    var wasTargetHit =target.wasIHit(x,y);
+          
+      for(key in thingie_array) { 
+        thingie_array[key].wasIHit();
+      }
+
+    if((!wasTargetHit)&&(!suspendFlag)){
+      webkitRequestAnimationFrame( animateActiveBall, 30 );
+    }
+  } // end of function animateActiveBall
+
+   function initializeControlBall(){
+       ballIsInPlay = true; //need more reliable way to tell if ball is in play than checking buttons for class status (time lag?)
+
+      // initializeControlBall resets velocity of the ball to zero and provides a 'deader' bounce value of -0.4, rather inelastic.
+     deltaX=0;
+     deltaY=0;
+     y=10;
+     bounce= -0.4;
+     scoreboard.startTimer();
+      document.getElementById('controlBall').className = 'hidden';// #controlBall refers to the button releasing the ball (legacy reasons)
+//       updateOrientation();// check one more time, no this causes HUGE problems
+           controlActiveBall();
+
+   }
+   
+// FUNCTION CONTROLACTIVEBALL() ******************************************************************************************
+  // This KEY function controls movement of the small red ball, using accelX and accelY to alter deltaX and deltaY (velocity values)
+  // and dispatching calls to the rectangles (is a ball rebound necessary), the target (was I hit?), and the thingies (changes to score,
+  // loss of the current ball, etc.
+  
+  function controlActiveBall(){
+    var ballAlive = true;
+    var survivedThingie = true;
+    deltaX=.97*(deltaX+accelX);// .95 is a friction coefficient stab in the dark
+    deltaY=.97*(deltaY+accelY);
+
+    for(key in rect_array) { 
+      rect_array[key].findWallCollision();
+    }
+      
+    x = x+deltaX;
+    y = y+deltaY;
+    activeBall.style['WebkitTransform']= 'translate('+x+'px,'+y+'px)';
+
+    var wasTargetHit =target.wasIHit(x,y);
+    
+    if(wasTargetHit){ //Game over, add 50 points (plus more for unused balls? minus time penalty---for now, just 50 points)
+      x = target.centerX-8;
+      y = target.centerY-8;
+
+      activeBall.style['WebkitTransform']= 'translate('+x+'px,'+y+'px)';
+
+      scoreboard.changeScore(50);
+      scoreboard.stopTimer();
+      scoreboard.gameOverManager();
+    }
+    
+      for(key in thingie_array) { 
+        survivedThingie = thingie_array[key].wasIHit(); // bombs return false if hit, misses and non-fatal encounters return true
+        ballAlive = (ballAlive && survivedThingie);
+      }
+
+    if (!ballAlive){
+      // this attempt at adding audio when bombs are hit doesn't work for me.
+      var audioElement = document.createElement('audio');
+      audioElement.setAttribute('src', 'explode2.wav');
+      audioElement.play();
+      //          explosion.volume = 1;
+      //          explosion.play();
+      x = 0; y=6; // return ball to the origin
+      activeBall.style['WebkitTransform']= 'translate('+x+'px,'+y+'px)';
+      document.getElementById('controlBall').className = ''; // remove class hidden from the button to release the ball.
+      //repaint any thingies that were hit and made invisible and shifted off theSurface
+        
+      for(key in thingie_array) { 
+        thingie_array[key].repaintHiddenThingie();
+      } 
+    } else {
+
+      if(!wasTargetHit && !suspendFlag && ballAlive){
+        webkitRequestAnimationFrame( controlActiveBall, 30 );
+      }
+    }
+  } // end of function controlActiveBall
+
+// SCOREBOARD OBJECT  ******************************************************************************************
+
+ var scoreboard = {
+    score: 0,
+    time: 0,
+    ballsLeft: 3,
+    priorAccumulatedTime: 0,
+    currentTimerStartTime: 0,
+    intrvl : 0,
+    
+    updateScoreboard : function() {
+      document.getElementById('score').innerHTML = this.score;
+      document.getElementById('ballsRemaining').innerHTML = this.ballsLeft;
+      document.getElementById('elapsedTime').innerHTML = Math.round(this.time/1000);
+    },
+    
+    startTimer: function(){
+      this.currentTimerStartTime = Date.now();
+      var self = this;
+      this.intrvl = setInterval( function() { self.updateScoreboardTimer(); }, 1000);
+       
+    },
+
+    stopTimer: function(){
+      clearInterval(this.intrvl);
+      this.time = this.priorAccumulatedTime + Date.now() - this.currentTimerStartTime; // one last timer call.
+
+      this.priorAccumulatedTime = this.time;
+      this.updateScoreboard();
+      },
+    
+    updateScoreboardTimer : function(){
+      this.time = this.priorAccumulatedTime + Date.now() - this.currentTimerStartTime;
+      this.updateScoreboard();
+    },
+    
+    changeScore: function(pointChange) {
+      this.score += pointChange;
+    },
+    
+    ballWasDestroyed : function() {
+      this.ballsLeft -= 1;
+      ballIsInPlay = false;
+
+      this.stopTimer();
+
+      if (this.ballsLeft == 0) {
+              //GAME OVER-- HANDLE THIS
+        this.gameOverManager();
+      }
+      
+    }, // end of ballWasDestroyed
+    
+  gameOverManager : function() {
+    ballIsInPlay = false;
+    document.getElementById('changeToGameOver').innerHTML = 'GAME OVER!';
+    document.getElementById('ballsRemaining').className = 'removed';
+    document.getElementById('controlBall').className = ''; // remove class hidden from the button to release the ball.
+    document.getElementById('controlBall').value = 'Start New Game'; 
+    document.getElementById('controlBall').addEventListener('touchstart',function() {window.location='game.html';} , false );
+
+    //LOCAL STORAGE OF 5 HIGHEST SCORES
+
+    var  currentResult = new gameResult(0,scoreboard.score,scoreboard.time / 1000,Date.now()); //"rank" is 0 for now and will be disregarded
+    var storedResultsJSON = localStorage.getItem('highScores');
+    console.log (storedResultsJSON);
+    var elementWasInserted = false;
+
+    if(storedResultsJSON != null){
+      var storedResults = JSON.parse(storedResultsJSON); // storedResults should be an array of objects.
+      console.log('length of incoming stored results array is '+storedResults.length);
+      for (var i=0; i < storedResults.length; i++){
+        if (currentResult.score > storedResults[i].score){
+          storedResults.splice(i,0,currentResult);
+          elementWasInserted = true;
+          break;
+        }
+      }
+
+      if(!elementWasInserted){
+        var newLength = storedResults.push(currentResult);
+      }
+
+      if(storedResults.length > 5) { // it might be 6, shouldn't be greater
+        storedResults.pop(); // losing the last, lowest score
+      }
+
+      var packet = JSON.stringify(storedResults);
+
+      localStorage.setItem('highScores',packet);
+
+    } else {
+      var resultObjArray = [currentResult];
+      var packet = JSON.stringify(resultObjArray);
+      localStorage.setItem('highScores',packet);
+    }
+
+  }, // end of gameOverManager
+
+  } // end scoreboard object definition
+  
+  // GAMERESULT OBJECT -- DEFINES STRUCTURE OF A SINGLE ARRAY ELEMENT FOR LOCAL STORAGE ***********************************
+
+  function gameResult(rank,score,elapsedTime,date) {
+    this.rank = rank; // currently rank is ignored.
+    this.score = score;
+    this.elapsedTime = elapsedTime;
+    this.date = date;
+  }
+  
+// TARGET (LARGE GREEN CIRCULAR DEAL) OBJECT  ******************************************************************************
+
+ var target = { //the target is modeled on a hole. The ball must get reasonably close to the center to fall in, not just contact it.
+    centerX : 240*tabletMultiplier,
+    centerY : 150*tabletMultiplier,
+    radius : 16,
+    distanceToBall : 0,
+    
+    wasIHit : function(){
+      this.distanceToBall = Math.round(Math.sqrt( (x+8-this.centerX)*(x+8-this.centerX)+(y+8-this.centerY)*(y+8-this.centerY) ));
+
+      if(this.distanceToBall<13){
+        return true;
+      } else {
+        return false;
+      }
+
+     }, // end of function wasIHit
+     
+  } // end target literal object
+  
+  
+  
+  function suspendPlay() {suspendFlag = true;snd.play();}
+  function resumePlay() {suspendFlag = false;snd.play(); controlActiveBall();}
+  
+//  ******************************************************************************************
+//  ********       CODE WHICH FOLLOWS IS EXECUTED BEFORE ANY USER INPUT       ****************
+//  ******************************************************************************************
+
+
+  if(window.screen.width>window.screen.height){                 // Is tablet?
+    var tabletMultiplier = 2.4; // resizes the board surface for Android Nexus 10, special case
+    var landscapeNative = true;
+    gravity = 2; // slightly higher effect of tilt seems realistic
+  } else if (window.screen.height>1000) {
+    var tabletMultiplier = 2; // iPad surface is smaller
+        var landscapeNative = false; // orientation of 0 is portrait
+
+    gravity = 1; // empirically chosen to seem realistic
+  } else {
+   var tabletMultiplier = 1; // phone surface is smaller
+    gravity = 1; // empirically chosen to seem realistic
+        var landscapeNative = false; // orientation of 0 is portrait
+  }
+  
+  // TARGET (LARGE GREEN CIRCULAR DEAL) OBJECT  ******************************************************************************
+  // needs tabletMultiplier value to be defined (see a few lines above
+ var target = { //the target is modeled on a hole. The ball must get reasonably close to the center to fall in, not just contact it.
+    centerX : 275*tabletMultiplier,
+    centerY : 141*tabletMultiplier,
+    radius : 16,
+    distanceToBall : 0,
+    
+    wasIHit : function(){
+      this.distanceToBall = Math.round(Math.sqrt( (x+8-this.centerX)*(x+8-this.centerX)+(y+8-this.centerY)*(y+8-this.centerY) ));
+
+      if(this.distanceToBall<13){
+        return true;
+      } else {
+        return false;
+      }
+
+     }, // end of function wasIHit
+     
+  } // end target literal object
+  
+
+// RECT OBJECTS SET UP  ******************************************************************************
+
+// Current board consists of 21 rectangles. Set them up. 
+
+  var Rect1 = new Rect('Rect1',0,0,400,60,true,false, true, true);
+  var Rect2 = new Rect('Rect2',400,0,500,60,true,true, false, false);
+  var Rect3 = new Rect('Rect3',400,60,500,120,false,true, true, false);
+  var Rect4 = new Rect('Rect4',300,60,400,120,true,false, false, false);
+  var Rect5 = new Rect('Rect5',200,60,300,120,true,false, true, false);
+  var Rect6 = new Rect('Rect6',100,60,200,120,true,false, true, false);
+  var Rect7 = new Rect('Rect7',200,120,300,180,true,true, true, false);
+  var Rect8 = new Rect('Rect8',0,60,100,120,true,false, false, true);
+  var Rect9 = new Rect('Rect9',0,120,100,180,false,true, false, true);
+  var Rect10 = new Rect('Rect10',0,180,100,210,false,false, false, true);
+  var Rect11 = new Rect('Rect11',100,120,200,180,true,false, false, true);
+  var Rect12 = new Rect('Rect12',100,180,200,210,false,false, true, false);
+  var Rect13 = new Rect('Rect13',200,180,300,210,true,true, false, false);
+  var Rect14 = new Rect('Rect14',200,210,300,240,false,false, true, true);
+  var Rect15 = new Rect('Rect15',300,120,400,150,false,false, false, true);
+  var Rect16 = new Rect('Rect16',400,120,500,150,true,true, false, false);
+  var Rect17 = new Rect('Rect17',400,150,500,210,false,true, false, true);
+  var Rect18 = new Rect('Rect18',400,210,500,240,false,true, true, false);
+  var Rect19 = new Rect('Rect19',300,150,400,210,false,true, false, true);
+  var Rect20 = new Rect('Rect20',300,210,400,240,false,false, true, false);
+  var Rect21 = new Rect('Rect21',0,210,100,240,false,true, true, true);
+
+  var rect_array = [Rect1,Rect2,Rect3,Rect4,Rect5,Rect6,Rect7,Rect8,Rect9,Rect10,Rect11,Rect12,Rect13,Rect14,Rect15,Rect16,Rect17,Rect18,Rect19,Rect20,Rect21];
+
+  for(key in rect_array) { 
+    rect_array[key].drawRectWalls(); 
+  }
+  
+// THINGIE OBJECTS SET UP  ******************************************************************************
+  
+  if (tabletMultiplier == 1){ // iPhone gets a smaller collection of obstacles and gold
+
+    var thingie1 = new thingie('thingie1', 'bomb', 300,20,0); // parameters are center X, center Y, and points awarded
+    var thingie2 = new thingie('thingie2', 'gold', 180,150,25); 
+    var thingie3 = new thingie('thingie3', 'bomb', 335,80,0);//bombs have zero points which signifies ball destruction by convention
+    var thingie4 = new thingie('thingie4', 'bomb', 150,145,0);
+    var thingie5 = new thingie('thingie5', 'gold', 450,180,25);
+    var thingie6 = new thingie('thingie6', 'peel', 220,150,-10);
+    var thingie7 = new thingie('thingie7', 'gold', 75,140,25);
+    var thingie8 = new thingie('thingie8', 'gold', 50,200,25);
+    var thingie9 = new thingie('thingie9', 'bomb', 150,45,0); 
+    var thingie10 = new thingie('thingie10', 'bomb', 400,105,0); 
+    var thingie11 = new thingie('thingie11', 'peel', 350,200,-10);
+    var thingie12 = new thingie('thingie12', 'peel', 150,190,-10);
+    var thingie13 = new thingie('thingie13', 'bomb', 200,105,0); 
+    var thingie14 = new thingie('thingie14', 'bomb', 50,120,0); 
+      var thingie15 = new thingie('thingie15', 'peel', 100,90,-10);
+    var thingie16 = new thingie('thingie16', 'peel', 150,190,-10);
+
+    var thingie_array = [thingie1,thingie2,thingie3,thingie4,thingie5,thingie6,thingie7,thingie8,thingie9,thingie10,thingie11,thingie12,thingie13,thingie14,thingie15,thingie16];
+  
+  } else {  //here's the larger collection for tablets
+  
+    var thingie1 = new thingie('thingie1', 'bomb', 300,20,0); // parameters are center X, center Y, and points awarded
+    var thingie2 = new thingie('thingie2', 'gold', 180,150,25); // gold is plus 25
+    var thingie3 = new thingie('thingie3', 'bomb', 335,80,0);//bombs have zero points which signifies ball destruction by convention
+    var thingie4 = new thingie('thingie4', 'bomb', 150,145,0);
+    var thingie5 = new thingie('thingie5', 'gold', 450,180,25);
+    var thingie6 = new thingie('thingie6', 'peel', 220,150,-10); //peel is -10 plus unpredictable change of direction
+    var thingie7 = new thingie('thingie7', 'gold', 75,140,25);
+    var thingie8 = new thingie('thingie8', 'gold', 50,200,25);
+    var thingie9 = new thingie('thingie9', 'bomb', 150,55,0); 
+    var thingie10 = new thingie('thingie10', 'bomb', 390,115,0); 
+    var thingie11 = new thingie('thingie11', 'peel', 450,60,-10);
+    var thingie12 = new thingie('thingie12', 'peel', 150,190,-10);
+    var thingie13 = new thingie('thingie13', 'bomb', 200,105,0); 
+    var thingie14 = new thingie('thingie14', 'bomb', 50,120,0); 
+    var thingie15 = new thingie('thingie15', 'peel', 420,60,-10);
+    var thingie16 = new thingie('thingie16', 'peel', 50,180,-10);
+    var thingie17 = new thingie('thingie17', 'bomb', 170,30,0); 
+    var thingie18 = new thingie('thingie18', 'bomb', 195,15,0); 
+    var thingie19 = new thingie('thingie19', 'peel', 370,90,-10);
+    var thingie20 = new thingie('thingie20', 'peel', 230,40,-10);
+    var thingie21 = new thingie('thingie21', 'bomb', 400,70,0); 
+    var thingie22 = new thingie('thingie22', 'bomb', 480,60,0); 
+    var thingie23 = new thingie('thingie23', 'peel', 400,140,-10);
+    var thingie24 = new thingie('thingie24', 'peel', 430,210,-10);
+    var thingie25 = new thingie('thingie25', 'bomb', 280,160,0); 
+    var thingie26 = new thingie('thingie26', 'bomb', 420,230,0); 
+    var thingie27 = new thingie('thingie27', 'peel', 350,180,-10);
+    var thingie28 = new thingie('thingie28', 'peel', 100,200,-10);
+    var thingie29 = new thingie('thingie29', 'bomb', 250,130,0); 
+    var thingie30 = new thingie('thingie30', 'bomb', 430,150,0); 
+    var thingie31 = new thingie('thingie31', 'peel', 30,50,-10);
+    var thingie32 = new thingie('thingie32', 'bomb', 250,210,0);
+    var thingie33 = new thingie('thingie33', 'gold', 290,130,25);
+    var thingie34 = new thingie('thingie34', 'peel', 205,205,-10);
+    var thingie35 = new thingie('thingie35', 'gold', 400,220,25);
+    var thingie36 = new thingie('thingie36', 'peel', 400,235,-10);
+
+    var thingie_array = [thingie1,thingie2,thingie3,thingie4,thingie5,thingie6,thingie7,thingie8,thingie9,thingie10,thingie11,thingie12,thingie13,thingie14,thingie15,thingie16,thingie17,thingie18,thingie19,thingie20,thingie21,thingie22,thingie23,thingie24,thingie25,thingie26,thingie27,thingie28,thingie29,thingie30,thingie31,thingie32,thingie33,thingie34,thingie35,thingie36];
+  }
+  
+  for(key in thingie_array) { 
+    thingie_array[key].drawthingie();
+  }
+
+  var x = 0; // for testing rect idea we'll move starting position off the origin
+  var y= 20;
+  var deltaX=2; // used for constant speed animation, ARCHAIC
+  var deltaY=2;
+//   var bounce=-1;// ball bounces off solid walls with no loss of velocity, ARCHAIC ALSO
+  var zoneWidth=500; //hard wired must match the style sheet info for theSurface
+  var zoneHeight=250; //hard wired must match the style sheet info for theSurface
+  var accelX=0;
+  var accelY=0;
+  var wasTargetHit;
+  var xArrowAngle = '90deg';
+  var yArrowAngle = '180deg';
+  var suspendFlag = false; // RESET IF THE DEVICE ORIENTATION CHANGES FROM THE SINGLE OK LANDSCAPE ORIENTATION
+  document.getElementById('mainMenu').addEventListener('touchstart',function() {window.location='main.html';} , false );
+// localStorage.clear();
+
+  var snd = new Audio("button-19.mp3"); // mp3 works for chrome on the laptop -- NOT CURRENTLY USING SND
+  var ballIsInPlay = false; //needed more reliable way to tell if ball is in play than checking buttons for class status (time lag?)
+  
+// DRAW AND POSITION THE RED MOVING BALL AND THE LARGE GREEN TARGET HOLE  *********************************************************
+  var targetHole = document.createElement("img");
+  targetHole.src = "images/green32.png";
+  theSurface.appendChild(targetHole);
+  targetHole.style.position = "absolute";
+  targetHole.style.left=(target.centerX-16)+"px";
+  targetHole.style.top=(target.centerY-16)+"px";
+  var activeBall = document.createElement("img");
+  activeBall.src = "images/red16.png";
+  theSurface.appendChild(activeBall);
+  activeBall.style.webkitTransform= 'translate(0px, 6px)'; // move it so that it hangs from the top wall?
+//  THE FOLLOWING ATTEMPTS TO MAKE THE RED BALL RESPOND TO TOUCH JUST LIKE TOUCHING THE RELEASE BALL BUTTON. DOESN'T WORK
+  document.getElementById('controlBall').addEventListener('touchstart',function() {initializeControlBall();} , false )
+  scoreboard.updateScoreboard();
+  
+// BEFORE THE GAME BEGINS, A DEVICE ORIENTATION CHECK RESULTING IN AN ALERT IF UNHAPPY
+// DURING THE GAME, THE SCOREBOARD IS REPLACED BY A MESSAGE AREA COMPLAINING ABOUT ORIENTATION CHANGES (IN RED TEXT)
+  
+  if(window.orientation != undefined){
+  
+  if (!landscapeNative){
+    if (window.orientation != 90) {
+      orientText = 'You must use your phone or iPad in landscape orientation';
+      alert(orientText);
+      suspendFlag = true;
+    }
+  }   else if (window.orientation !=0) {
+    orientText = 'You must use your tablet in landscape orientation';
+    alert(orientText);
+    suspendFlag = true;
+  }
+  } else {
+    orientText = 'Non-mobile user: This game is not for you! Requires handheld.';
+//     orientText = 'Non-mobile user: only move ball and animate ball will work.'; ARCHAIC
+  alert(orientText);
+
+    suspendFlag = false;
+  }
+</script> 
+
+</body> 
+</html>

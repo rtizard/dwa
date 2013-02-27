@@ -1,0 +1,32 @@
+<html>
+<head>
+<title>Game Main Menu</title>
+<meta name="viewport" content="user-scalable=no, width=device-width" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="stylesheet" type="text/css" href="iphone.css" media="only screen" />
+</head>
+<body>
+<div id="container">
+<div id="header">
+<h1>Game Main Menu</h1>
+<div id="nav">
+<ul>
+  <li id='game'>New Game</li>
+  <li id='scores'>High Scores</li>
+  <li id='guide'>Cheesy User Guide<li>
+  <li id='quit'>Quit</li>
+</ul>
+</div>
+</div>
+
+</div>
+<script type="text/javascript"> 
+  document.getElementById('game').addEventListener('touchstart',function() {window.location='game.html';} , false );
+  document.getElementById('scores').addEventListener('touchstart',function() {window.location='scores.html';} , false );
+//   document.getElementById('quit').addEventListener('touchstart',function() {alert ('closing?');window.close();} , false ) ;// this does nothing (after the alert)
+  document.getElementById('guide').addEventListener('touchstart',function() {window.location='guide.html';} , false ) ;
+  document.getElementById('quit').addEventListener('touchstart',function() {window.location='http://www.apple.com';} , false ); // well, it's somewhere
+</script>
+</body>
+
+</html>     
